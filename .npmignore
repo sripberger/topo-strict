@@ -1,0 +1,5 @@
+test/
+.eslintrc.yaml
+.eslintignore
+.gitignore
+docs.yaml

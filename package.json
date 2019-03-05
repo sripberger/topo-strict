@@ -1,0 +1,31 @@
+{
+  "name": "topo-strict",
+  "version": "0.0.0",
+  "description": "Strict topographical sorting",
+  "author": "Steve Ripberger",
+  "license": "MIT",
+  "repository": "github:sripberger/topo-strict",
+  "scripts": {
+    "lint": "eslint .",
+    "unit": "mocha -r esm test/setup.js test/unit",
+    "integration": "mocha -r esm test/setup.js test/integration",
+    "test": "npm run lint && npm run unit && npm run integration",
+    "docs": "documentation build ./lib/index.js -c docs.yaml -f html -o docs",
+    "postversion": "npm run docs && gh-pages -d docs && git push && git push --tags"
+  },
+  "main": "cjs",
+  "dependencies": {
+    "esm": "^3.2.11"
+  },
+  "devDependencies": {
+    "@sripberger/eslint-config": "^1.0.3",
+    "chai": "^4.2.0",
+    "documentation": "^9.3.0",
+    "eslint": "^5.15.1",
+    "eslint-plugin-jsdoc": "^4.1.1",
+    "gh-pages": "^2.0.1",
+    "mocha": "^6.0.2",
+    "sinon": "^7.2.7",
+    "sinon-chai": "^3.3.0"
+  }
+}
