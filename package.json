@@ -16,7 +16,8 @@
   "main": "cjs",
   "dependencies": {
     "esm": "^3.2.11",
-    "lodash": "^4.17.11"
+    "lodash": "^4.17.11",
+    "nani": "^2.2.1"
   },
   "devDependencies": {
     "@sripberger/eslint-config": "^1.0.3",
