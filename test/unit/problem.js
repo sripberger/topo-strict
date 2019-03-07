@@ -1,3 +1,5 @@
+import * as utils from '../../lib/utils';
+import { ArgumentError } from '../../lib/argument-error';
 import { Problem } from '../../lib/problem';
 import _ from 'lodash';
 
@@ -126,6 +128,190 @@ describe('Problem', function() {
 
 		it('does nothing if everything is ok', function() {
 			problem.add([ 'foo', 'bar' ], 'baz');
+		});
+	});
+
+	describe('#_getKeyErrors', function() {
+		const values = [ 'foo', 'bar' ];
+		const groupKey = 'baz';
+		let result;
+
+		beforeEach(function() {
+			sinon.stub(problem, '_getKeyCollisionErrors')
+				.returns([ 'qux', 'wtf' ]);
+			sinon.stub(Problem, '_getDuplicateKeyErrors')
+				.returns([ 'omg', 'ffs' ]);
+
+			result = problem._getKeyErrors(values, groupKey);
+		});
+
+		it('gets key collision errors', function() {
+			expect(problem._getKeyCollisionErrors).to.be.calledOnce;
+			expect(problem._getKeyCollisionErrors).to.be.calledOn(problem);
+			expect(problem._getKeyCollisionErrors).to.be.calledWith(
+				values,
+				groupKey
+			);
+		});
+
+		it('gets duplicate key errors', function() {
+			expect(Problem._getDuplicateKeyErrors).to.be.calledOnce;
+			expect(Problem._getDuplicateKeyErrors).to.be.calledOn(Problem);
+			expect(Problem._getDuplicateKeyErrors).to.be.calledWith(
+				values,
+				groupKey
+			);
+		});
+
+		it('returns all fetched errors', function() {
+			expect(result).to.deep.equal([ 'qux', 'wtf', 'omg', 'ffs' ]);
+		});
+	});
+
+	describe('::_getKeyCollisionErrors', function() {
+		const values = [ 'foo', 'bar' ];
+		const valueCollisionErrors = [ new Error('foo'), new Error('bar') ];
+
+		beforeEach(function() {
+			problem.items = { baz: {}, qux: {} };
+
+			sinon.stub(problem, '_getValueCollisionErrors')
+				.returns(valueCollisionErrors.slice());
+		});
+
+		it('gets and returns value collision errors', function() {
+			const result = problem._getKeyCollisionErrors(values, 'wtf');
+
+			expect(problem._getValueCollisionErrors).to.be.calledOnce;
+			expect(problem._getValueCollisionErrors).to.be.calledOn(problem);
+			expect(problem._getValueCollisionErrors).to.be.calledWith(values);
+			expect(result).to.deep.equal(valueCollisionErrors);
+		});
+
+		it('appends an ArgumentError if group key is an item key', function() {
+			const result = problem._getKeyCollisionErrors(values, 'qux');
+
+			expect(result).to.have.length(3);
+			expect(result.slice(0, 2)).to.deep.equal(valueCollisionErrors);
+			expect(result[2]).to.be.an.instanceof(ArgumentError);
+			expect(result[2].message).to.equal(
+				'Group key \'qux\' is already in use as a value',
+			);
+			expect(result[2].info).to.deep.equal({ group: 'qux' });
+		});
+	});
+
+	describe('#_getValueCollisionErrors', function() {
+		const values = [ 'foo', 'bar' ];
+		let result;
+
+		beforeEach(function() {
+			sinon.stub(problem, '_getExistingValueErrors')
+				.returns([ 'baz', 'qux' ]);
+			sinon.stub(problem, '_getExistingGroupErrors')
+				.returns([ 'wtf', 'omg' ]);
+
+			result = problem._getValueCollisionErrors(values);
+		});
+
+		it('gets errors for collisions with existing values', function() {
+			expect(problem._getExistingValueErrors).to.be.calledOnce;
+			expect(problem._getExistingValueErrors).to.be.calledOn(problem);
+			expect(problem._getExistingValueErrors).to.be.calledWith(values);
+		});
+
+		it('gets errors for collisions with group keys', function() {
+			expect(problem._getExistingGroupErrors).to.be.calledOnce;
+			expect(problem._getExistingGroupErrors).to.be.calledOn(problem);
+			expect(problem._getExistingGroupErrors).to.be.calledWith(values);
+		});
+
+		it('returns all fetched errors', function() {
+			expect(result).to.deep.equal([ 'baz', 'qux', 'wtf', 'omg' ]);
+		});
+	});
+
+	describe('#_getExistingValueErrors', function() {
+		beforeEach(function() {
+			sinon.stub(_, 'intersection').returns([]);
+		});
+
+		it('gets the intersection of unique values and item keys', function() {
+			problem.items = { baz: {}, qux: {} };
+
+			problem._getExistingValueErrors([ 'foo', 'bar', 'foo' ]);
+
+			expect(_.intersection).to.be.calledOnce;
+			expect(_.intersection).to.be.calledWith(
+				[ 'foo', 'bar' ],
+				[ 'baz', 'qux' ]
+			);
+		});
+
+		it('normally returns an empty array', function() {
+			const result = problem._getExistingValueErrors([]);
+
+			expect(result).to.deep.equal([]);
+		});
+
+		it('returns ArgumentErrors for each intersection result', function() {
+			_.intersection.returns([ 'omg', 'wow' ]);
+
+			const result = problem._getExistingValueErrors([]);
+
+			expect(result).to.have.length(2);
+			expect(result[0]).to.be.an.instanceof(ArgumentError);
+			expect(result[0].message).to.equal(
+				'Value \'omg\' has already been added'
+			);
+			expect(result[0].info).to.deep.equal({ value: 'omg' });
+			expect(result[1]).to.be.an.instanceof(ArgumentError);
+			expect(result[1].message).to.equal(
+				'Value \'wow\' has already been added'
+			);
+			expect(result[1].info).to.deep.equal({ value: 'wow' });
+		});
+	});
+
+	describe('#_getExistingGroupErrors', function() {
+		beforeEach(function() {
+			sinon.stub(_, 'intersection').returns([]);
+		});
+
+		it('gets the intersection of unique values and group keys', function() {
+			problem.groups = { baz: [], qux: [] };
+
+			problem._getExistingGroupErrors([ 'foo', 'bar', 'foo' ]);
+
+			expect(_.intersection).to.be.calledOnce;
+			expect(_.intersection).to.be.calledWith(
+				[ 'foo', 'bar' ],
+				[ 'baz', 'qux' ]
+			);
+		});
+
+		it('normally returns an empty array', function() {
+			const result = problem._getExistingGroupErrors([]);
+
+			expect(result).to.deep.equal([]);
+		});
+
+		it('returns ArgumentErrors for each intersection result', function() {
+			_.intersection.returns([ 'omg', 'wtf' ]);
+
+			const result = problem._getExistingGroupErrors([]);
+
+			expect(result).to.have.length(2);
+			expect(result[0]).to.be.an.instanceof(ArgumentError);
+			expect(result[0].message).to.equal(
+				'Value \'omg\' is already in use as a group key'
+			);
+			expect(result[0].info).to.deep.equal({ value: 'omg' });
+			expect(result[1]).to.be.an.instanceof(ArgumentError);
+			expect(result[1].message).to.equal(
+				'Value \'wtf\' is already in use as a group key'
+			);
+			expect(result[1].info).to.deep.equal({ value: 'wtf' });
 		});
 	});
 
@@ -274,6 +460,73 @@ describe('Problem', function() {
 
 			expect(result).to.deep.equal(constraint);
 			expect(result).to.not.equal(constraint);
+		});
+	});
+
+	describe('::_getDuplicateKeyErrors', function() {
+		const values = [ 'foo', 'bar' ];
+		const duplicateValueErrors = [ new Error('foo'), new Error('bar') ];
+
+		beforeEach(function() {
+			sinon.stub(Problem, '_getDuplicateValueErrors')
+				.returns(duplicateValueErrors.slice());
+		});
+
+		it('gets and returns duplicate value errors', function() {
+			const result = Problem._getDuplicateKeyErrors(values, 'baz');
+
+			expect(Problem._getDuplicateValueErrors).to.be.calledOnce;
+			expect(Problem._getDuplicateValueErrors).to.be.calledOn(Problem);
+			expect(Problem._getDuplicateValueErrors).to.be.calledWith(values);
+			expect(result).to.deep.equal(duplicateValueErrors);
+		});
+
+		it('appends an ArgumentError if group key appears in values', function() {
+			const result = Problem._getDuplicateKeyErrors(values, 'bar');
+
+			expect(result).to.have.length(3);
+			expect(result.slice(0, 2)).to.deep.equal(duplicateValueErrors);
+			expect(result[2]).to.be.an.instanceof(ArgumentError);
+			expect(result[2].message).to.equal(
+				'Group key \'bar\' also appears in values',
+			);
+			expect(result[2].info).to.deep.equal({ group: 'bar' });
+		});
+	});
+
+	describe('::_getDuplicateValueErrors', function() {
+		let values;
+
+		beforeEach(function() {
+			values = [ 'foo', 'bar' ];
+			sinon.stub(utils, 'getDuplicates').returns([]);
+		});
+
+		it('gets duplicate values', function() {
+			Problem._getDuplicateValueErrors(values);
+
+			expect(utils.getDuplicates).to.be.calledOnce;
+			expect(utils.getDuplicates).to.be.calledWith(values);
+		});
+
+		it('normally returns an empty array', function() {
+			const result = Problem._getDuplicateValueErrors(values);
+
+			expect(result).to.deep.equal([]);
+		});
+
+		it('returns ArgumentErrors for any duplicate values', function() {
+			utils.getDuplicates.returns([ 'baz', 'qux' ]);
+
+			const result = Problem._getDuplicateValueErrors(values);
+
+			expect(result).to.have.length(2);
+			expect(result[0]).to.be.an.instanceof(ArgumentError);
+			expect(result[0].message).to.equal('Duplicate value \'baz\'');
+			expect(result[0].info).to.deep.equal({ value: 'baz' });
+			expect(result[1]).to.be.an.instanceof(ArgumentError);
+			expect(result[1].message).to.equal('Duplicate value \'qux\'');
+			expect(result[1].info).to.deep.equal({ value: 'qux' });
 		});
 	});
 });
