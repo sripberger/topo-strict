@@ -1,5 +1,4 @@
 import * as utils from '../../lib/utils';
-import { ArgumentError } from '../../lib/argument-error';
 import { KeySet } from '../../lib/key-set';
 import _ from 'lodash';
 
@@ -61,7 +60,7 @@ describe('KeySet', function() {
 	});
 
 	describe('#_getDuplicates', function() {
-		let keySet, duplicateValues;
+		let keySet;
 
 		beforeEach(function() {
 			keySet = new KeySet('foo', 'bar', { group: 'baz' });
