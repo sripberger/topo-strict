@@ -132,39 +132,40 @@ describe('Problem', function() {
 	});
 
 	describe('#_getKeyErrors', function() {
-		const values = [ 'foo', 'bar' ];
-		const groupKey = 'baz';
+		const values = [ 'foo', 1, 'bar', 'bar', true, {}, 'foo', 'baz' ];
+		const groupKey = 'group key';
 		let result;
 
 		beforeEach(function() {
 			sinon.stub(problem, '_getKeyCollisionErrors')
-				.returns([ 'qux', 'wtf' ]);
+				.returns([ 'omg', 'wow' ]);
+
 			sinon.stub(Problem, '_getDuplicateKeyErrors')
-				.returns([ 'omg', 'ffs' ]);
+				.returns([ 'wtf', 'ffs' ]);
 
 			result = problem._getKeyErrors(values, groupKey);
 		});
 
-		it('gets key collision errors', function() {
+		it('gets key collision errors with unique string values', function() {
 			expect(problem._getKeyCollisionErrors).to.be.calledOnce;
 			expect(problem._getKeyCollisionErrors).to.be.calledOn(problem);
 			expect(problem._getKeyCollisionErrors).to.be.calledWith(
-				values,
+				[ 'foo', 'bar', 'baz' ],
 				groupKey
 			);
 		});
 
-		it('gets duplicate key errors', function() {
+		it('gets duplicate key errors with all string values', function() {
 			expect(Problem._getDuplicateKeyErrors).to.be.calledOnce;
 			expect(Problem._getDuplicateKeyErrors).to.be.calledOn(Problem);
 			expect(Problem._getDuplicateKeyErrors).to.be.calledWith(
-				values,
+				[ 'foo', 'bar', 'bar', 'foo', 'baz' ],
 				groupKey
 			);
 		});
 
 		it('returns all fetched errors', function() {
-			expect(result).to.deep.equal([ 'qux', 'wtf', 'omg', 'ffs' ]);
+			expect(result).to.deep.equal([ 'omg', 'wow', 'wtf', 'ffs' ]);
 		});
 	});
 
@@ -236,10 +237,10 @@ describe('Problem', function() {
 			sinon.stub(_, 'intersection').returns([]);
 		});
 
-		it('gets the intersection of unique values and item keys', function() {
+		it('gets the intersection of values and item keys', function() {
 			problem.items = { baz: {}, qux: {} };
 
-			problem._getExistingValueErrors([ 'foo', 'bar', 'foo' ]);
+			problem._getExistingValueErrors([ 'foo', 'bar' ]);
 
 			expect(_.intersection).to.be.calledOnce;
 			expect(_.intersection).to.be.calledWith(
@@ -278,10 +279,10 @@ describe('Problem', function() {
 			sinon.stub(_, 'intersection').returns([]);
 		});
 
-		it('gets the intersection of unique values and group keys', function() {
+		it('gets the intersection of values and group keys', function() {
 			problem.groups = { baz: [], qux: [] };
 
-			problem._getExistingGroupErrors([ 'foo', 'bar', 'foo' ]);
+			problem._getExistingGroupErrors([ 'foo', 'bar' ]);
 
 			expect(_.intersection).to.be.calledOnce;
 			expect(_.intersection).to.be.calledWith(
