@@ -60,70 +60,36 @@ describe('KeySet', function() {
 		});
 	});
 
-	describe('#_getDuplicateKeyErrors', function() {
-		const duplicateValueErrors = [ new Error('foo'), new Error('bar') ];
-		let keySet;
+	describe('#_getDuplicates', function() {
+		let keySet, duplicateValues;
 
 		beforeEach(function() {
 			keySet = new KeySet('foo', 'bar', { group: 'baz' });
-			sinon.stub(keySet, '_getDuplicateValueErrors')
-				.returns(duplicateValueErrors.slice());
-		});
-
-		it('gets and returns duplicate value errors', function() {
-			const result = keySet._getDuplicateKeyErrors();
-
-			expect(keySet._getDuplicateValueErrors).to.be.calledOnce;
-			expect(keySet._getDuplicateValueErrors).to.be.calledOn(keySet);
-			expect(result).to.deep.equal(duplicateValueErrors);
-		});
-
-		it('appends an ArgumentError if group key appears in values', function() {
-			keySet.group = 'bar';
-
-			const result = keySet._getDuplicateKeyErrors();
-
-			expect(result).to.have.length(3);
-			expect(result.slice(0, 2)).to.deep.equal(duplicateValueErrors);
-			expect(result[2]).to.be.an.instanceof(ArgumentError);
-			expect(result[2].message).to.equal(
-				'Group key \'bar\' also appears in values',
-			);
-			expect(result[2].info).to.deep.equal({ group: 'bar' });
-		});
-	});
-
-	describe('#_getDuplicateValueErrors', function() {
-		let keySet;
-
-		beforeEach(function() {
-			keySet = new KeySet('foo', 'bar');
-			sinon.stub(utils, 'getDuplicates').returns([]);
+			sinon.stub(utils, 'getDuplicates').returns([ 'dup1', 'dup2' ]);
 		});
 
 		it('gets duplicate values', function() {
-			keySet._getDuplicateValueErrors();
+			keySet._getDuplicates();
 
 			expect(utils.getDuplicates).to.be.calledOnce;
 			expect(utils.getDuplicates).to.be.calledWith(keySet.values);
 		});
 
-		it('normally returns an empty array', function() {
-			expect(keySet._getDuplicateValueErrors()).to.deep.equal([]);
+		it('maps duplicate values to objects with necessary info', function() {
+			expect(keySet._getDuplicates()).to.deep.equal([
+				{ key: 'dup1', keyType: 'value' },
+				{ key: 'dup2', keyType: 'value' },
+			]);
 		});
 
-		it('returns ArgumentErrors for any duplicate values', function() {
-			utils.getDuplicates.returns([ 'baz', 'qux' ]);
+		it('appends object for group key colliding with values', function() {
+			keySet.group = 'bar';
 
-			const result = keySet._getDuplicateValueErrors();
-
-			expect(result).to.have.length(2);
-			expect(result[0]).to.be.an.instanceof(ArgumentError);
-			expect(result[0].message).to.equal('Duplicate value \'baz\'');
-			expect(result[0].info).to.deep.equal({ value: 'baz' });
-			expect(result[1]).to.be.an.instanceof(ArgumentError);
-			expect(result[1].message).to.equal('Duplicate value \'qux\'');
-			expect(result[1].info).to.deep.equal({ value: 'qux' });
+			expect(keySet._getDuplicates()).to.deep.equal([
+				{ key: 'dup1', keyType: 'value' },
+				{ key: 'dup2', keyType: 'value' },
+				{ key: 'bar', keyType: 'group' },
+			]);
 		});
 	});
 
