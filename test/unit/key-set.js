@@ -60,7 +60,7 @@ describe('KeySet', function() {
 		});
 	});
 
-	describe('::_getDuplicateKeyErrors', function() {
+	describe('#_getDuplicateKeyErrors', function() {
 		const duplicateValueErrors = [ new Error('foo'), new Error('bar') ];
 		let keySet;
 
@@ -93,7 +93,7 @@ describe('KeySet', function() {
 		});
 	});
 
-	describe('::_getDuplicateValueErrors', function() {
+	describe('#_getDuplicateValueErrors', function() {
 		let keySet;
 
 		beforeEach(function() {
