@@ -131,25 +131,25 @@ describe('Problem', function() {
 		});
 	});
 
-	describe('#_getKeyErrors', function() {
+	describe('#_getKeyCollisionErrors', function() {
 		const values = [ 'foo', 1, 'bar', 'bar', true, {}, 'foo', 'baz' ];
 		const groupKey = 'group key';
 		let result;
 
 		beforeEach(function() {
-			sinon.stub(problem, '_getKeyCollisionErrors')
+			sinon.stub(problem, '_getKeyInUseErrors')
 				.returns([ 'omg', 'wow' ]);
 
 			sinon.stub(Problem, '_getDuplicateKeyErrors')
 				.returns([ 'wtf', 'ffs' ]);
 
-			result = problem._getKeyErrors(values, groupKey);
+			result = problem._getKeyCollisionErrors(values, groupKey);
 		});
 
 		it('gets key collision errors with unique string values', function() {
-			expect(problem._getKeyCollisionErrors).to.be.calledOnce;
-			expect(problem._getKeyCollisionErrors).to.be.calledOn(problem);
-			expect(problem._getKeyCollisionErrors).to.be.calledWith(
+			expect(problem._getKeyInUseErrors).to.be.calledOnce;
+			expect(problem._getKeyInUseErrors).to.be.calledOn(problem);
+			expect(problem._getKeyInUseErrors).to.be.calledWith(
 				[ 'foo', 'bar', 'baz' ],
 				groupKey
 			);
@@ -169,28 +169,28 @@ describe('Problem', function() {
 		});
 	});
 
-	describe('::_getKeyCollisionErrors', function() {
+	describe('::_getKeyInUseErrors', function() {
 		const values = [ 'foo', 'bar' ];
 		const valueCollisionErrors = [ new Error('foo'), new Error('bar') ];
 
 		beforeEach(function() {
 			problem.items = { baz: {}, qux: {} };
 
-			sinon.stub(problem, '_getValueCollisionErrors')
+			sinon.stub(problem, '_getValueInUseErrors')
 				.returns(valueCollisionErrors.slice());
 		});
 
 		it('gets and returns value collision errors', function() {
-			const result = problem._getKeyCollisionErrors(values, 'wtf');
+			const result = problem._getKeyInUseErrors(values, 'wtf');
 
-			expect(problem._getValueCollisionErrors).to.be.calledOnce;
-			expect(problem._getValueCollisionErrors).to.be.calledOn(problem);
-			expect(problem._getValueCollisionErrors).to.be.calledWith(values);
+			expect(problem._getValueInUseErrors).to.be.calledOnce;
+			expect(problem._getValueInUseErrors).to.be.calledOn(problem);
+			expect(problem._getValueInUseErrors).to.be.calledWith(values);
 			expect(result).to.deep.equal(valueCollisionErrors);
 		});
 
 		it('appends an ArgumentError if group key is an item key', function() {
-			const result = problem._getKeyCollisionErrors(values, 'qux');
+			const result = problem._getKeyInUseErrors(values, 'qux');
 
 			expect(result).to.have.length(3);
 			expect(result.slice(0, 2)).to.deep.equal(valueCollisionErrors);
@@ -202,7 +202,7 @@ describe('Problem', function() {
 		});
 	});
 
-	describe('#_getValueCollisionErrors', function() {
+	describe('#_getValueInUseErrors', function() {
 		const values = [ 'foo', 'bar' ];
 		let result;
 
@@ -212,7 +212,7 @@ describe('Problem', function() {
 			sinon.stub(problem, '_getExistingGroupErrors')
 				.returns([ 'wtf', 'omg' ]);
 
-			result = problem._getValueCollisionErrors(values);
+			result = problem._getValueInUseErrors(values);
 		});
 
 		it('gets errors for collisions with existing values', function() {
