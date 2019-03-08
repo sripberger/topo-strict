@@ -98,12 +98,12 @@ describe('KeySet', function() {
 		beforeEach(function() {
 			keySet = new KeySet('foo', 'bar', { group: 'baz' });
 			existingKeys = {
-				values: [ 'existingValue1', 'existingValue2' ],
+				items: [ 'existingValue1', 'existingValue2' ],
 				groups: [ 'existingGroup1', 'existingGroup2' ],
 			};
 
 			sinon.stub(_, 'intersection')
-				.withArgs(keySet.values, existingKeys.values)
+				.withArgs(keySet.values, existingKeys.items)
 				.returns([ 'wtf', 'omg' ])
 				.withArgs(keySet.values, existingKeys.groups)
 				.returns([ 'wow', 'ffs' ]);
@@ -115,7 +115,7 @@ describe('KeySet', function() {
 			expect(_.intersection).to.be.calledTwice;
 			expect(_.intersection).to.be.calledWithExactly(
 				keySet.values,
-				existingKeys.values
+				existingKeys.items
 			);
 			expect(_.intersection).to.be.calledWithExactly(
 				keySet.values,
