@@ -24,8 +24,12 @@ describe('Problem', function() {
 		beforeEach(function() {
 			values = [];
 			options = {};
+
 			_normalizeAddArgs = sinon.stub(Problem, '_normalizeAddArgs');
+
 			_normalizeAddArgs.returns({ values, options });
+
+			sinon.stub(problem, '_getKeyErrors');
 			sinon.stub(problem, '_validateKeys');
 		});
 
@@ -131,6 +135,52 @@ describe('Problem', function() {
 		});
 	});
 
+	describe('#_getKeyErrors', function() {
+		const values = [ 'Value 1', 'Value 2' ];
+		const groupKey = 'Group key';
+		const before = [ 'Before 1', 'Before 2' ];
+		const after = [ 'After 1', 'after 2' ];
+		let result;
+
+		beforeEach(function() {
+			sinon.stub(problem, '_getInvalidKeyErrors')
+				.returns([ 'foo', 'bar' ]);
+
+			sinon.stub(problem, '_getKeyCollisionErrors')
+				.returns([ 'baz', 'qux' ]);
+
+			result = problem._getKeyErrors(values, groupKey, before, after);
+		});
+
+		it('gets invalid key errors from all arguments', function() {
+			expect(problem._getInvalidKeyErrors).to.be.calledOnce;
+			expect(problem._getInvalidKeyErrors).to.be.calledOn(problem);
+			expect(problem._getInvalidKeyErrors).to.be.calledWith(
+				values,
+				groupKey,
+				before,
+				after
+			);
+		});
+
+		it('gets key collision errors from values and group key', function() {
+			expect(problem._getKeyCollisionErrors).to.be.calledOnce;
+			expect(problem._getKeyCollisionErrors).to.be.calledOn(problem);
+			expect(problem._getKeyCollisionErrors).to.be.calledWith(
+				values,
+				groupKey
+			);
+		});
+
+		it('returns all fetched errors', function() {
+			expect(result).to.deep.equal([ 'foo', 'bar', 'baz', 'qux' ]);
+		});
+	});
+
+	describe('#_getInvalidKeyErrors', function() {
+		it('gets all errors for non-string keys');
+	});
+
 	describe('#_getKeyCollisionErrors', function() {
 		const values = [ 'foo', 1, 'bar', 'bar', true, {}, 'foo', 'baz' ];
 		const groupKey = 'group key';
@@ -146,7 +196,7 @@ describe('Problem', function() {
 			result = problem._getKeyCollisionErrors(values, groupKey);
 		});
 
-		it('gets key collision errors with unique string values', function() {
+		it('gets key-in-use errors with unique string values', function() {
 			expect(problem._getKeyInUseErrors).to.be.calledOnce;
 			expect(problem._getKeyInUseErrors).to.be.calledOn(problem);
 			expect(problem._getKeyInUseErrors).to.be.calledWith(
