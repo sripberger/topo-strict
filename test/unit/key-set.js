@@ -59,7 +59,7 @@ describe('KeySet', function() {
 		});
 	});
 
-	describe('#_getDuplicates', function() {
+	describe('#_getDuplicationInfo', function() {
 		let keySet;
 
 		beforeEach(function() {
@@ -68,26 +68,26 @@ describe('KeySet', function() {
 		});
 
 		it('gets duplicate values', function() {
-			keySet._getDuplicates();
+			keySet._getDuplicationInfo();
 
 			expect(utils.getDuplicates).to.be.calledOnce;
 			expect(utils.getDuplicates).to.be.calledWith(keySet.values);
 		});
 
 		it('maps duplicate values to objects with necessary info', function() {
-			expect(keySet._getDuplicates()).to.deep.equal([
-				{ key: 'dup1', keyType: 'value' },
-				{ key: 'dup2', keyType: 'value' },
+			expect(keySet._getDuplicationInfo()).to.deep.equal([
+				{ type: 'duplication', key: 'dup1', keyType: 'value' },
+				{ type: 'duplication', key: 'dup2', keyType: 'value' },
 			]);
 		});
 
 		it('appends object for group key colliding with values', function() {
 			keySet.group = 'bar';
 
-			expect(keySet._getDuplicates()).to.deep.equal([
-				{ key: 'dup1', keyType: 'value' },
-				{ key: 'dup2', keyType: 'value' },
-				{ key: 'bar', keyType: 'group' },
+			expect(keySet._getDuplicationInfo()).to.deep.equal([
+				{ type: 'duplication', key: 'dup1', keyType: 'value' },
+				{ type: 'duplication', key: 'dup2', keyType: 'value' },
+				{ type: 'duplication', key: 'bar', keyType: 'group' },
 			]);
 		});
 	});
