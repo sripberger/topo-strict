@@ -37,11 +37,12 @@ describe('Problem', function() {
 		});
 
 		it('adds an item for each key set value', function() {
-			keySet.values.push('foo', 'bar');
+			problem.items = { foo: {} };
+			keySet.values.push('bar', 'baz');
 
 			problem.add();
 
-			expect(problem.items).to.have.keys('foo', 'bar');
+			expect(problem.items).to.have.keys('foo', 'bar', 'baz');
 		});
 
 		it('copies key set before and after property to items', function() {
