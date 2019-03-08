@@ -76,18 +76,75 @@ describe('KeySet', function() {
 
 		it('maps duplicate values to objects with necessary info', function() {
 			expect(keySet._getDuplicationInfo()).to.deep.equal([
-				{ type: 'duplication', key: 'dup1', keyType: 'value' },
-				{ type: 'duplication', key: 'dup2', keyType: 'value' },
+				{ type: 'duplication', keyType: 'value', key: 'dup1' },
+				{ type: 'duplication', keyType: 'value', key: 'dup2' },
 			]);
 		});
 
-		it('appends object for group key colliding with values', function() {
+		it('appends object for group key being duplicated in values', function() {
 			keySet.group = 'bar';
 
 			expect(keySet._getDuplicationInfo()).to.deep.equal([
-				{ type: 'duplication', key: 'dup1', keyType: 'value' },
-				{ type: 'duplication', key: 'dup2', keyType: 'value' },
-				{ type: 'duplication', key: 'bar', keyType: 'group' },
+				{ type: 'duplication', keyType: 'value', key: 'dup1' },
+				{ type: 'duplication', keyType: 'value', key: 'dup2' },
+				{ type: 'duplication', keyType: 'group', key: 'bar' },
+			]);
+		});
+	});
+
+	describe('#_getCollisionInfo', function() {
+		let keySet, existingKeys;
+
+		beforeEach(function() {
+			keySet = new KeySet('foo', 'bar', { group: 'baz' });
+			existingKeys = {
+				values: [ 'existingValue1', 'existingValue2' ],
+				groups: [ 'existingGroup1', 'existingGroup2' ],
+			};
+
+			sinon.stub(_, 'intersection')
+				.withArgs(keySet.values, existingKeys.values)
+				.returns([ 'wtf', 'omg' ])
+				.withArgs(keySet.values, existingKeys.groups)
+				.returns([ 'wow', 'ffs' ]);
+		});
+
+		it('gets intersections of values with existing keys', function() {
+			keySet._getCollisionInfo(existingKeys);
+
+			expect(_.intersection).to.be.calledTwice;
+			expect(_.intersection).to.be.calledWithExactly(
+				keySet.values,
+				existingKeys.values
+			);
+			expect(_.intersection).to.be.calledWithExactly(
+				keySet.values,
+				existingKeys.groups
+			);
+		});
+
+		it('maps intersection results to info objects', function() {
+			expect(keySet._getCollisionInfo(existingKeys)).to.deep.equal([
+				{ type: 'valueCollision', key: 'wtf', keyType: 'value' },
+				{ type: 'valueCollision', key: 'omg', keyType: 'value' },
+				{ type: 'groupCollision', key: 'wow', keyType: 'value' },
+				{ type: 'groupCollision', key: 'ffs', keyType: 'value' },
+			]);
+		});
+
+		it('appends info for group key colliding with existing values', function() {
+			keySet.group = 'existingValue1';
+
+			expect(keySet._getCollisionInfo(existingKeys)).to.deep.equal([
+				{ type: 'valueCollision', key: 'wtf', keyType: 'value' },
+				{ type: 'valueCollision', key: 'omg', keyType: 'value' },
+				{ type: 'groupCollision', key: 'wow', keyType: 'value' },
+				{ type: 'groupCollision', key: 'ffs', keyType: 'value' },
+				{
+					type: 'valueCollision',
+					key: 'existingValue1',
+					keyType: 'group',
+				},
 			]);
 		});
 	});
