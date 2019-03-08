@@ -46,28 +46,44 @@ describe('Problem', function() {
 		});
 
 		it('copies key set before and after property to items', function() {
-			keySet.values.push('foo', 'bar');
-			keySet.before = [ 'baz', 'qux' ];
+			keySet.values.push('foo');
+			keySet.before = [ 'bar', 'baz' ];
 			keySet.after = [ 'omg', 'wow' ];
 
 			problem.add();
 
-			expect(problem.items).to.have.keys('foo', 'bar');
 			expect(problem.items.foo).to.deep.equal({
 				before: keySet.before,
 				after: keySet.after,
 			});
 		});
 
-		it('adds a group with copy of values, if key set has one', function() {
+		it('skips empty before property', function() {
+			keySet.values.push('foo');
+			keySet.after = [ 'bar' ];
+
+			problem.add();
+
+			expect(problem.items.foo).to.deep.equal({ after: keySet.after });
+		});
+
+		it('skips empty after property', function() {
+			keySet.values.push('foo');
+			keySet.before = [ 'bar' ];
+
+			problem.add();
+
+			expect(problem.items.foo).to.deep.equal({ before: keySet.before });
+		});
+
+		it('adds a group with values, if key set has one', function() {
 			keySet.values.push('foo', 'bar', 'baz');
 			keySet.group = 'qux';
 
 			problem.add();
 
 			expect(problem.groups).to.have.keys('qux');
-			expect(problem.groups.qux).to.deep.equal(keySet.values);
-			expect(problem.groups.qux).to.not.equal(keySet.values);
+			expect(problem.groups.qux).to.deep.equal([ 'foo', 'bar', 'baz' ]);
 		});
 
 		it('appends to group values, if they already exist', function() {
