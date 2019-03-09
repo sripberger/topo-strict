@@ -65,6 +65,10 @@ describe('KeySet', function() {
 		});
 	});
 
+	describe('#validate', function() {
+		it('gets errors and throws if any are found');
+	});
+
 	describe('#_getErrors', function() {
 		const existingKeys = { items: [], groups: [] };
 		const fooInfo = { name: 'foo' };
