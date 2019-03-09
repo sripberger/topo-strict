@@ -1,8 +1,5 @@
 import * as keySetModule from '../../lib/key-set';
-import * as utils from '../../lib/utils';
-import { ArgumentError } from '../../lib/argument-error';
 import { Problem } from '../../lib/problem';
-import _ from 'lodash';
 
 describe('Problem', function() {
 	let problem;
@@ -19,14 +16,27 @@ describe('Problem', function() {
 		expect(problem.groups).to.deep.equal({});
 	});
 
+	describe('@keys', function() {
+		it('returns categorized keys from items and groups', function() {
+			problem.items = { foo: {}, bar: {} };
+			problem.groups = { baz: [], qux: [] };
+			problem.randomProp = { omg: 'wtf' };
+
+			expect(problem.keys).to.deep.equal({
+				items: [ 'foo', 'bar' ],
+				groups: [ 'baz', 'qux' ],
+			});
+		});
+	});
+
 	describe('#add', function() {
 		let keySet;
 
 		beforeEach(function() {
 			keySet = new keySetModule.KeySet();
 			sinon.stub(keySetModule, 'KeySet').returns(keySet);
+			sinon.stub(keySet, 'validate');
 			sinon.stub(problem, '_addKeySet');
-			sinon.stub(problem, '_validateKeys');
 		});
 
 		it('creates a key set with provided arguments', function() {
@@ -37,6 +47,19 @@ describe('Problem', function() {
 			expect(keySetModule.KeySet).to.be.calledWith('foo', 'bar');
 		});
 
+		it('validates the key set with existing keys', function() {
+			const existingKeys = {};
+			sinon.stub(problem, 'keys').get(() => existingKeys);
+
+			problem.add();
+
+			expect(keySet.validate).to.be.calledOnce;
+			expect(keySet.validate).to.be.calledOn(keySet);
+			expect(keySet.validate).to.be.calledWith(
+				sinon.match.same(existingKeys)
+			);
+		});
+
 		it('adds the key set to the problem', function() {
 			problem.add();
 
@@ -45,22 +68,8 @@ describe('Problem', function() {
 			expect(problem._addKeySet).to.be.calledWith(keySet);
 		});
 
-		it('invokes #_validateKeys with key set values and group', function() {
-			keySet.values.push('foo', 'bar');
-			keySet.group = 'baz';
-
-			problem.add();
-
-			expect(problem._validateKeys).to.be.calledOnce;
-			expect(problem._validateKeys).to.be.calledOn(problem);
-			expect(problem._validateKeys).to.be.calledWith(
-				keySet.values,
-				keySet.group
-			);
-		});
-
-		it('does not add the key set if #_validateKeys throws', function() {
-			problem._validateKeys.throws(new Error('omg'));
+		it('does not add the key set if validation throws', function() {
+			keySet.validate.throws(new Error('omg'));
 
 			expect(() => problem.add()).to.throw();
 			expect(problem._addKeySet).to.not.be.called;
@@ -133,22 +142,6 @@ describe('Problem', function() {
 
 			expect(problem.groups).to.have.keys('baz');
 			expect(problem.groups.baz).to.deep.equal([ 'qux', 'foo', 'bar' ]);
-		});
-	});
-
-	describe('_validateKeys', function() {
-		it('throws if there is a duplicate in the provided values');
-
-		it('throws if the group key appears in values');
-
-		it('throws if a value already has an item');
-
-		it('throws if the group key already has an item');
-
-		it('throws if a value is already in use as a group key');
-
-		it('does nothing if everything is ok', function() {
-			problem._validateKeys([ 'foo', 'bar' ], 'baz');
 		});
 	});
 });
