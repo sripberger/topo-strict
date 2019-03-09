@@ -15,12 +15,12 @@
   },
   "main": "cjs",
   "dependencies": {
-    "esm": "^3.2.11",
+    "esm": "^3.2.14",
     "lodash": "^4.17.11",
     "nani": "^2.2.1"
   },
   "devDependencies": {
-    "@sripberger/eslint-config": "^1.0.3",
+    "@sripberger/eslint-config": "^1.0.4",
     "chai": "^4.2.0",
     "documentation": "^9.3.0",
     "eslint": "^5.15.1",
