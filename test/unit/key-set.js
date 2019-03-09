@@ -65,6 +65,41 @@ describe('KeySet', function() {
 		});
 	});
 
+	describe('#_getErrors', function() {
+		const existingKeys = { items: [], groups: [] };
+		const fooInfo = { name: 'foo' };
+		const barInfo = { name: 'bar' };
+		const fooErr = new Error('foo');
+		const barErr = new Error('bar');
+		let keySet, result;
+
+		beforeEach(function() {
+			keySet = new KeySet();
+			sinon.stub(keySet, '_getErrorInfo').returns([ fooInfo, barInfo ]);
+			sinon.stub(utils, 'getErrorForInfo')
+				.withArgs(fooInfo).returns(fooErr)
+				.withArgs(barInfo).returns(barErr);
+
+			result = keySet._getErrors(existingKeys);
+		});
+
+		it('gets error info', function() {
+			expect(keySet._getErrorInfo).to.be.calledOnce;
+			expect(keySet._getErrorInfo).to.be.calledOn(keySet);
+			expect(keySet._getErrorInfo).to.be.calledWith(existingKeys);
+		});
+
+		it('gets error for each info', function() {
+			expect(utils.getErrorForInfo).to.be.calledTwice;
+			expect(utils.getErrorForInfo).to.be.calledWith(fooInfo);
+			expect(utils.getErrorForInfo).to.be.calledWith(barInfo);
+		});
+
+		it('returns fetched errors', function() {
+			expect(result).to.deep.equal([ fooErr, barErr ]);
+		});
+	});
+
 	describe('#_getErrorInfo', function() {
 		const existingKeys = { items: [], groups: [] };
 		let keySet, result;
