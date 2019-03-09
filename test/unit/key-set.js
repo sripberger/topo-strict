@@ -65,6 +65,40 @@ describe('KeySet', function() {
 		});
 	});
 
+	describe('#_getErrorInfo', function() {
+		const existingKeys = { items: [], groups: [] };
+		let keySet, result;
+
+		beforeEach(function() {
+			keySet = new KeySet();
+			sinon.stub(keySet, '_getInvalidKeyInfo').returns([ 'foo', 'bar' ]);
+			sinon.stub(keySet, '_getDuplicationInfo').returns([ 'baz' ]);
+			sinon.stub(keySet, '_getCollisionInfo').returns([ 'qux' ]);
+
+			result = keySet._getErrorInfo(existingKeys);
+		});
+
+		it('gets info for invalid keys', function() {
+			expect(keySet._getInvalidKeyInfo).to.be.calledOnce;
+			expect(keySet._getInvalidKeyInfo).to.be.calledOn(keySet);
+		});
+
+		it('gets info for duplicate keys', function() {
+			expect(keySet._getDuplicationInfo).to.be.calledOnce;
+			expect(keySet._getDuplicationInfo).to.be.calledOn(keySet);
+		});
+
+		it('gets info for colliding keys', function() {
+			expect(keySet._getCollisionInfo).to.be.calledOnce;
+			expect(keySet._getCollisionInfo).to.be.calledOn(keySet);
+			expect(keySet._getCollisionInfo).to.be.calledWith(existingKeys);
+		});
+
+		it('returns all fetched info', function() {
+			expect(result).to.deep.equal([ 'foo', 'bar', 'baz', 'qux' ]);
+		});
+	});
+
 	describe('#_getInvalidKeyInfo', function() {
 		it('returns info objects for empty or non-string keys', function() {
 			const keySet = new KeySet({
