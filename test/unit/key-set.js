@@ -53,9 +53,15 @@ describe('KeySet', function() {
 		});
 
 		it('defaults to null group', function() {
+			expect(new KeySet().group).to.be.null;
+		});
+
+		it('supports falsy groups', function() {
+			options.group = false;
+
 			const keySet = new KeySet();
 
-			expect(keySet.group).to.be.null;
+			expect(keySet.group).to.be.false;
 		});
 	});
 
