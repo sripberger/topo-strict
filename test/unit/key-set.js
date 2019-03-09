@@ -65,6 +65,57 @@ describe('KeySet', function() {
 		});
 	});
 
+	describe('#_getInvalidKeyInfo', function() {
+		it('returns info objects for empty or non-string keys', function() {
+			const keySet = new KeySet({
+				values: [ 'value1', 42, { foo: 'bar' }, 'value2', '' ],
+				before: [ '', 'before1', 0, 'before2' ],
+				after: [ 'after1', 'after2', '', false ],
+				group: 'group key',
+			});
+
+			expect(keySet._getInvalidKeyInfo()).to.deep.equal([
+				{ type: 'invalidKey', keyType: 'value', key: 42 },
+				{ type: 'invalidKey', keyType: 'value', key: { foo: 'bar' } },
+				{ type: 'invalidKey', keyType: 'value', key: '' },
+				{ type: 'invalidKey', keyType: 'before', key: '' },
+				{ type: 'invalidKey', keyType: 'before', key: 0 },
+				{ type: 'invalidKey', keyType: 'after', key: '' },
+				{ type: 'invalidKey', keyType: 'after', key: false },
+			]);
+		});
+
+		it('appends info for group key, it it is not a string', function() {
+			const keySet = new KeySet({
+				values: true,
+				before: 42,
+				after: 0,
+				group: false,
+			});
+
+			expect(keySet._getInvalidKeyInfo()).to.deep.equal([
+				{ type: 'invalidKey', keyType: 'value', key: true },
+				{ type: 'invalidKey', keyType: 'before', key: 42 },
+				{ type: 'invalidKey', keyType: 'after', key: 0 },
+				{ type: 'invalidKey', keyType: 'group', key: false },
+			]);
+		});
+
+		it('appends info for group key, it it is an empty string', function() {
+			const keySet = new KeySet({ group: '' });
+
+			expect(keySet._getInvalidKeyInfo()).to.deep.equal([
+				{ type: 'invalidKey', keyType: 'group', key: '' },
+			]);
+		});
+
+		it('ignores null group key', function() {
+			const keySet = new KeySet();
+
+			expect(keySet._getInvalidKeyInfo()).to.deep.equal([]);
+		});
+	});
+
 	describe('#_getDuplicationInfo', function() {
 		let keySet;
 
