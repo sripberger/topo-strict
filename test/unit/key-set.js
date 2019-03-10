@@ -437,7 +437,7 @@ describe('KeySet', function() {
 		beforeEach(function() {
 			options = _.clone(originalOptions);
 
-			sinon.stub(KeySet, '_normalizeArrayOption')
+			sinon.stub(utils, 'normalizeArrayOption')
 				.withArgs(values).returns(normalizedValues)
 				.withArgs(before).returns(normalizedBefore)
 				.withArgs(after).returns(normalizedAfter);
@@ -446,11 +446,10 @@ describe('KeySet', function() {
 		it('normalizes all three array options', function() {
 			KeySet._normalizeOptions(options);
 
-			expect(KeySet._normalizeArrayOption).to.be.calledThrice;
-			expect(KeySet._normalizeArrayOption).to.always.be.calledOn(KeySet);
-			expect(KeySet._normalizeArrayOption).to.be.calledWith(values);
-			expect(KeySet._normalizeArrayOption).to.be.calledWith(before);
-			expect(KeySet._normalizeArrayOption).to.be.calledWith(after);
+			expect(utils.normalizeArrayOption).to.be.calledThrice;
+			expect(utils.normalizeArrayOption).to.be.calledWith(values);
+			expect(utils.normalizeArrayOption).to.be.calledWith(before);
+			expect(utils.normalizeArrayOption).to.be.calledWith(after);
 		});
 
 		it('returns copy with normalized array options', function() {
@@ -471,7 +470,7 @@ describe('KeySet', function() {
 
 			const result = KeySet._normalizeOptions(options);
 
-			expect(KeySet._normalizeArrayOption).to.not.be.called;
+			expect(utils.normalizeArrayOption).to.not.be.called;
 			expect(result).to.deep.equal({
 				foo: 'bar',
 				values: [],
@@ -484,23 +483,6 @@ describe('KeySet', function() {
 			KeySet._normalizeOptions(options);
 
 			expect(options).to.deep.equal(originalOptions);
-		});
-	});
-
-	describe('::_normalizeArrayOption', function() {
-		it('returns a copy of the option, if it is an array', function() {
-			const constraint = [ 'foo', 'bar' ];
-
-			const result = KeySet._normalizeArrayOption(constraint);
-
-			expect(result).to.deep.equal(constraint);
-			expect(result).to.not.equal(constraint);
-		});
-
-		it('returns option in an array, if it is not an array', function() {
-			const result = KeySet._normalizeArrayOption('foo');
-
-			expect(result).to.deep.equal([ 'foo' ]);
 		});
 	});
 });

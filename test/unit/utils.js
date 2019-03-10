@@ -1,4 +1,9 @@
-import { getDuplicates, getErrorForInfo } from '../../lib/utils';
+import {
+	getDuplicates,
+	getErrorForInfo,
+	normalizeArrayOption,
+} from '../../lib/utils';
+
 import { KeyError } from '../../lib/key-error';
 
 describe('Internal utils', function() {
@@ -133,6 +138,23 @@ describe('Internal utils', function() {
 				'Value \'foo\' is already in use as a group key'
 			);
 			expect(result.info).to.deep.equal({ key: 'foo' });
+		});
+	});
+
+	describe('normalizeArrayOption', function() {
+		it('returns a copy of the option, if it is an array', function() {
+			const constraint = [ 'foo', 'bar' ];
+
+			const result = normalizeArrayOption(constraint);
+
+			expect(result).to.deep.equal(constraint);
+			expect(result).to.not.equal(constraint);
+		});
+
+		it('returns option in an array, if it is not an array', function() {
+			const result = normalizeArrayOption('foo');
+
+			expect(result).to.deep.equal([ 'foo' ]);
 		});
 	});
 });
