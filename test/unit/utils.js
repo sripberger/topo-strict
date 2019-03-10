@@ -1,6 +1,7 @@
 import {
 	getDuplicates,
 	getErrorForInfo,
+	isInvalidKey,
 	normalizeArrayOption,
 } from '../../lib/utils';
 
@@ -138,6 +139,23 @@ describe('Internal utils', function() {
 				'Value \'foo\' is already in use as a group key'
 			);
 			expect(result.info).to.deep.equal({ key: 'foo' });
+		});
+	});
+
+	describe('isInvalidKey', function() {
+		it('returns false for non-empty strings', function() {
+			expect(isInvalidKey('foo')).to.be.false;
+			expect(isInvalidKey('bar')).to.be.false;
+		});
+
+		it('returns true for empty strings', function() {
+			expect(isInvalidKey('')).to.be.true;
+		});
+
+		it('returns true for non-strings', function() {
+			expect(isInvalidKey(42)).to.be.true;
+			expect(isInvalidKey(true)).to.be.true;
+			expect(isInvalidKey({ foo: 'bar' })).to.be.true;
 		});
 	});
 
