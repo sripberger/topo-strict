@@ -143,18 +143,27 @@ describe('Internal utils', function() {
 
 	describe('normalizeArrayOption', function() {
 		it('returns a copy of the option, if it is an array', function() {
-			const constraint = [ 'foo', 'bar' ];
+			const option = [ 'foo', 'bar' ];
 
-			const result = normalizeArrayOption(constraint);
+			const result = normalizeArrayOption(option);
 
-			expect(result).to.deep.equal(constraint);
-			expect(result).to.not.equal(constraint);
+			expect(result).to.deep.equal(option);
+			expect(result).to.not.equal(option);
 		});
 
 		it('returns option in an array, if it is not an array', function() {
-			const result = normalizeArrayOption('foo');
+			expect(normalizeArrayOption('foo')).to.deep.equal([ 'foo' ]);
+		});
 
-			expect(result).to.deep.equal([ 'foo' ]);
+		it('returns an empty array, if option is undefined', function() {
+			expect(normalizeArrayOption(undefined)).to.deep.equal([]);
+		});
+
+		it('supports other falsy options', function() {
+			expect(normalizeArrayOption('')).to.deep.equal([ '' ]);
+			expect(normalizeArrayOption(0)).to.deep.equal([ 0 ]);
+			expect(normalizeArrayOption(false)).to.deep.equal([ false ]);
+			expect(normalizeArrayOption(null)).to.deep.equal([ null ]);
 		});
 	});
 });
