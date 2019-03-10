@@ -1,5 +1,5 @@
 import { getDuplicates, getErrorForInfo } from '../../lib/utils';
-import { ArgumentError } from '../../lib/argument-error';
+import { KeyError } from '../../lib/key-error';
 
 describe('Internal utils', function() {
 	describe('getDuplicates', function() {
@@ -18,7 +18,7 @@ describe('Internal utils', function() {
 				key: 42,
 			});
 
-			expect(result).to.be.an.instanceof(ArgumentError);
+			expect(result).to.be.an.instanceof(KeyError);
 			expect(result.message).to.equal(
 				'Value \'42\' must be a non-empty string'
 			);
@@ -32,7 +32,7 @@ describe('Internal utils', function() {
 				key: 42,
 			});
 
-			expect(result).to.be.an.instanceof(ArgumentError);
+			expect(result).to.be.an.instanceof(KeyError);
 			expect(result.message).to.equal(
 				'Before key \'42\' must be a non-empty string'
 			);
@@ -46,7 +46,7 @@ describe('Internal utils', function() {
 				key: 42,
 			});
 
-			expect(result).to.be.an.instanceof(ArgumentError);
+			expect(result).to.be.an.instanceof(KeyError);
 			expect(result.message).to.equal(
 				'After key \'42\' must be a non-empty string'
 			);
@@ -60,7 +60,7 @@ describe('Internal utils', function() {
 				key: 42,
 			});
 
-			expect(result).to.be.an.instanceof(ArgumentError);
+			expect(result).to.be.an.instanceof(KeyError);
 			expect(result.message).to.equal(
 				'Group key \'42\' must be a non-empty string'
 			);
@@ -74,7 +74,7 @@ describe('Internal utils', function() {
 				key: 'foo',
 			});
 
-			expect(result).to.be.an.instanceof(ArgumentError);
+			expect(result).to.be.an.instanceof(KeyError);
 			expect(result.message).to.equal('Duplicate value \'foo\'');
 			expect(result.info).to.deep.equal({ key: 'foo' });
 		});
@@ -86,7 +86,7 @@ describe('Internal utils', function() {
 				key: 'foo',
 			});
 
-			expect(result).to.be.an.instanceof(ArgumentError);
+			expect(result).to.be.an.instanceof(KeyError);
 			expect(result.message).to.equal(
 				'Group key \'foo\' also appears in values'
 			);
@@ -100,7 +100,7 @@ describe('Internal utils', function() {
 				key: 'foo',
 			});
 
-			expect(result).to.be.an.instanceof(ArgumentError);
+			expect(result).to.be.an.instanceof(KeyError);
 			expect(result.message).to.equal(
 				'Value \'foo\' has already been added'
 			);
@@ -114,7 +114,7 @@ describe('Internal utils', function() {
 				key: 'foo',
 			});
 
-			expect(result).to.be.an.instanceof(ArgumentError);
+			expect(result).to.be.an.instanceof(KeyError);
 			expect(result.message).to.equal(
 				'Group key \'foo\' is already in use as a value'
 			);
@@ -128,7 +128,7 @@ describe('Internal utils', function() {
 				key: 'foo',
 			});
 
-			expect(result).to.be.an.instanceof(ArgumentError);
+			expect(result).to.be.an.instanceof(KeyError);
 			expect(result.message).to.equal(
 				'Value \'foo\' is already in use as a group key'
 			);

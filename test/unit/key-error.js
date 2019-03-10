@@ -1,8 +1,8 @@
-import { ArgumentError } from '../../lib/argument-error';
+import { KeyError } from '../../lib/key-error';
 import { TopoStrictError } from '../../lib/topo-strict-error';
 
-describe('ArgumentError', function() {
+describe('KeyError', function() {
 	it('extends TopoStrictError', function() {
-		expect(new ArgumentError()).to.be.an.instanceof(TopoStrictError);
+		expect(new KeyError()).to.be.an.instanceof(TopoStrictError);
 	});
 });
