@@ -1,5 +1,7 @@
+import * as nani from 'nani';
 import * as utils from '../../lib/utils';
 import { KeySet } from '../../lib/key-set';
+import { ValidationError } from '../../lib/validation-error';
 import _ from 'lodash';
 
 describe('KeySet', function() {
@@ -66,7 +68,44 @@ describe('KeySet', function() {
 	});
 
 	describe('#validate', function() {
-		it('gets errors and throws if any are found');
+		const existingKeys = { items: [], groups: [] };
+		const errors = [ new Error('foo'), new Error('bar') ];
+		let keySet;
+
+		beforeEach(function() {
+			keySet = new KeySet();
+			sinon.stub(keySet, '_getErrors').returns(errors);
+			sinon.stub(nani, 'fromArray').returns(null);
+		});
+
+		it('gets errors based on existing keys', function() {
+			keySet.validate(existingKeys);
+
+			expect(keySet._getErrors).to.be.calledOnce;
+			expect(keySet._getErrors).to.be.calledOn(keySet);
+			expect(keySet._getErrors).to.be.calledWith(existingKeys);
+		});
+
+		it('wraps errors using nani.fromArray', function() {
+			keySet.validate(existingKeys);
+
+			expect(nani.fromArray).to.be.calledOnce;
+			expect(nani.fromArray).to.be.calledWith(errors);
+		});
+
+		it('throws a ValidationError if fromArray result is not null', function() {
+			const errorFromArray = new Error('Error from array');
+			nani.fromArray.returns(errorFromArray);
+
+			expect(() => {
+				keySet.validate(existingKeys);
+			}).to.throw(ValidationError).that.satisfies((err) => {
+				const defaultMessage = ValidationError.getDefaultMessage();
+				expect(err.shortMessage).to.equal(defaultMessage);
+				expect(err.cause).to.equal(errorFromArray);
+				return true;
+			});
+		});
 	});
 
 	describe('#_getErrors', function() {
