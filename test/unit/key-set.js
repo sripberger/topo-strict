@@ -463,22 +463,6 @@ describe('KeySet', function() {
 			});
 		});
 
-		it('sets empty arrays for non-existent array options', function() {
-			delete options.values;
-			delete options.before;
-			delete options.after;
-
-			const result = KeySet._normalizeOptions(options);
-
-			expect(utils.normalizeArrayOption).to.not.be.called;
-			expect(result).to.deep.equal({
-				foo: 'bar',
-				values: [],
-				before: [],
-				after: [],
-			});
-		});
-
 		it('does not change original options', function() {
 			KeySet._normalizeOptions(options);
 
