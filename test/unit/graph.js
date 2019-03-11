@@ -12,61 +12,78 @@ describe('Graph', function() {
 		expect(graph.nodes).to.deep.equal({});
 	});
 
-	describe('#add', function() {
-		it('adds a node with no constraints', function() {
-			graph.add('foo');
+	describe('#addNode', function() {
+		it('adds a node with the provided value to the graph', function() {
+			graph.addNode('foo');
+			graph.addNode('bar');
 
+			expect(graph.nodes).to.have.keys('foo', 'bar');
 			expect(graph.nodes.foo).to.deep.equal({ value: 'foo', edges: [] });
+			expect(graph.nodes.bar).to.deep.equal({ value: 'bar', edges: [] });
 		});
 
-		it('adds a node with before constraints', function() {
+		it('throws without adding if value already has a node', function() {
 			const fooNode = graph.nodes.foo = { value: 'foo', edges: [] };
-			const barNode = graph.nodes.bar = { value: 'bar', edges: [] };
-
-			graph.add('baz', { before: [ 'foo', 'bar' ] });
-
-			expect(graph.nodes).to.have.property('baz');
-			expect(graph.nodes.baz.value).to.equal('baz');
-			expect(graph.nodes.baz.edges).to.have.length(2);
-			expect(graph.nodes.baz.edges[0]).to.equal(fooNode);
-			expect(graph.nodes.baz.edges[1]).to.equal(barNode);
-		});
-
-		it('adds a node with after constraints', function() {
-			const fooNode = graph.nodes.foo = { value: 'foo', edges: [] };
-			const barNode = graph.nodes.bar = {
-				value: 'bar',
-				edges: [ fooNode ],
-			};
-			const bazNode = graph.nodes.baz = {
-				value: 'baz',
-				edges: [ barNode ],
-			};
-
-			graph.add('qux', { after: [ 'bar', 'baz' ] });
-
-			expect(graph.nodes).to.have.property('qux');
-			expect(graph.nodes.qux.value).to.equal('qux');
-			expect(graph.nodes.qux.edges).to.be.empty;
-			expect(barNode.edges).to.have.length(2);
-			expect(barNode.edges[0]).to.equal(fooNode);
-			expect(barNode.edges[1]).to.equal(graph.nodes.qux);
-			expect(bazNode.edges[0]).to.equal(barNode);
-			expect(bazNode.edges[1]).to.equal(graph.nodes.qux);
-		});
-
-		it('throws without changing graph if value is already a node', function() {
-			graph.nodes.foo = { value: 'foo', edges: [] };
 
 			expect(() => {
-				graph.add('foo');
+				graph.addNode('foo');
 			}).to.throw(KeyError).that.satisfies((err) => {
 				expect(err.message).to.equal(
-					'Value \'foo\' is already in the graph'
+					'\'foo\' is already a node in the graph'
 				);
 				expect(err.info).to.deep.equal({ key: 'foo' });
 				return true;
 			});
+			expect(graph.nodes.foo).to.equal(fooNode);
+		});
+	});
+
+	describe('#addEdge', function() {
+		let fooNode, barNode, bazNode;
+
+		beforeEach(function() {
+			fooNode = graph.nodes.foo = { value: 'foo', edges: [] };
+			barNode = graph.nodes.bar = { value: 'bar', edges: [ fooNode ] };
+			bazNode = graph.nodes.baz = { value: 'baz', edges: [] };
+		});
+
+		it('appends `to` node to `from` node\'s edges', function() {
+			graph.addEdge('foo', 'baz');
+			graph.addEdge('bar', 'baz');
+
+			expect(fooNode.edges).to.have.length(1);
+			expect(fooNode.edges[0]).to.equal(bazNode);
+			expect(barNode.edges).to.have.length(2);
+			expect(barNode.edges[0]).to.equal(fooNode);
+			expect(barNode.edges[1]).to.equal(bazNode);
+		});
+
+		it('throws without appending if `from` node does not exist', function() {
+			expect(() => {
+				graph.addEdge('qux', 'foo');
+			}).to.throw(KeyError).that.satisfies((err) => {
+				expect(err.message).to.equal(
+					'\'qux\' is not a node in the graph'
+				);
+				return true;
+			});
+			expect(fooNode.edges).to.be.empty;
+			expect(barNode.edges).to.have.length(1);
+			expect(bazNode.edges).to.be.empty;
+		});
+
+		it('throws without appending if `to` node does not exist', function() {
+			expect(() => {
+				graph.addEdge('foo', 'qux');
+			}).to.throw(KeyError).that.satisfies((err) => {
+				expect(err.message).to.equal(
+					'\'qux\' is not a node in the graph'
+				);
+				return true;
+			});
+			expect(fooNode.edges).to.be.empty;
+			expect(barNode.edges).to.have.length(1);
+			expect(bazNode.edges).to.be.empty;
 		});
 	});
 });
