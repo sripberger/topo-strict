@@ -8,22 +8,22 @@ describe('Problem', function() {
 		problem = new Problem();
 	});
 
-	it('creates an object for storing items', function() {
-		expect(problem.items).to.deep.equal({});
+	it('creates an object for storing ids with their constraints', function() {
+		expect(problem.ids).to.deep.equal({});
 	});
 
-	it('creates an object for storing groups', function() {
+	it('creates an object for storing groups with their ids', function() {
 		expect(problem.groups).to.deep.equal({});
 	});
 
 	describe('@keys', function() {
-		it('returns categorized keys from items and groups', function() {
-			problem.items = { foo: {}, bar: {} };
+		it('returns categorized keys from ids and groups', function() {
+			problem.ids = { foo: {}, bar: {} };
 			problem.groups = { baz: [], qux: [] };
 			problem.randomProp = { omg: 'wtf' };
 
 			expect(problem.keys).to.deep.equal({
-				items: [ 'foo', 'bar' ],
+				ids: [ 'foo', 'bar' ],
 				groups: [ 'baz', 'qux' ],
 			});
 		});
@@ -83,48 +83,48 @@ describe('Problem', function() {
 			keySet = new keySetModule.KeySet();
 		});
 
-		it('adds an item for each key set value', function() {
-			problem.items = { foo: {} };
-			keySet.values.push('bar', 'baz');
+		it('adds entry for each id', function() {
+			problem.ids = { foo: {} };
+			keySet.ids.push('bar', 'baz');
 
 			problem._addKeySet(keySet);
 
-			expect(problem.items).to.have.keys('foo', 'bar', 'baz');
+			expect(problem.ids).to.have.keys('foo', 'bar', 'baz');
 		});
 
-		it('copies key set before and after property to items', function() {
-			keySet.values.push('foo');
+		it('copies constraints to new entries', function() {
+			keySet.ids.push('foo');
 			keySet.before = [ 'bar', 'baz' ];
 			keySet.after = [ 'omg', 'wow' ];
 
 			problem._addKeySet(keySet);
 
-			expect(problem.items.foo).to.deep.equal({
+			expect(problem.ids.foo).to.deep.equal({
 				before: keySet.before,
 				after: keySet.after,
 			});
 		});
 
-		it('skips empty before property', function() {
-			keySet.values.push('foo');
+		it('skips empty before constraint', function() {
+			keySet.ids.push('foo');
 			keySet.after = [ 'bar' ];
 
 			problem._addKeySet(keySet);
 
-			expect(problem.items.foo).to.deep.equal({ after: keySet.after });
+			expect(problem.ids.foo).to.deep.equal({ after: keySet.after });
 		});
 
-		it('skips empty after property', function() {
-			keySet.values.push('foo');
+		it('skips empty after constraint', function() {
+			keySet.ids.push('foo');
 			keySet.before = [ 'bar' ];
 
 			problem._addKeySet(keySet);
 
-			expect(problem.items.foo).to.deep.equal({ before: keySet.before });
+			expect(problem.ids.foo).to.deep.equal({ before: keySet.before });
 		});
 
-		it('adds a group with values, if key set has one', function() {
-			keySet.values.push('foo', 'bar', 'baz');
+		it('adds a group with ids, if key set has one', function() {
+			keySet.ids.push('foo', 'bar', 'baz');
 			keySet.group = 'qux';
 
 			problem._addKeySet(keySet);
@@ -133,8 +133,8 @@ describe('Problem', function() {
 			expect(problem.groups.qux).to.deep.equal([ 'foo', 'bar', 'baz' ]);
 		});
 
-		it('appends to group values, if they already exist', function() {
-			keySet.values.push('foo', 'bar');
+		it('appends to group ids, if they already exist', function() {
+			keySet.ids.push('foo', 'bar');
 			keySet.group = 'baz';
 			problem.groups.baz = [ 'qux' ];
 

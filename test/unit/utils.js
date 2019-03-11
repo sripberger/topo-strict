@@ -17,16 +17,16 @@ describe('Internal utils', function() {
 	});
 
 	describe('getErrorForInfo', function() {
-		it('returns an appopriate error for an invalid value', function() {
+		it('returns an appopriate error for an invalid id', function() {
 			const result = getErrorForInfo({
 				type: 'invalidKey',
-				keyType: 'value',
+				keyType: 'id',
 				key: 42,
 			});
 
 			expect(result).to.be.an.instanceof(KeyError);
 			expect(result.message).to.equal(
-				'Value \'42\' must be a non-empty string'
+				'Id \'42\' must be a non-empty string'
 			);
 			expect(result.info).to.deep.equal({ key: 42 });
 		});
@@ -73,19 +73,19 @@ describe('Internal utils', function() {
 			expect(result.info).to.deep.equal({ key: 42 });
 		});
 
-		it('returns an appropriate error for a duplicate value', function() {
+		it('returns an appropriate error for a duplicate id', function() {
 			const result = getErrorForInfo({
 				type: 'duplication',
-				keyType: 'value',
+				keyType: 'id',
 				key: 'foo',
 			});
 
 			expect(result).to.be.an.instanceof(KeyError);
-			expect(result.message).to.equal('Duplicate value \'foo\'');
+			expect(result.message).to.equal('Duplicate id \'foo\'');
 			expect(result.info).to.deep.equal({ key: 'foo' });
 		});
 
-		it('returns an appropriate error for group key duplicated in values', function() {
+		it('returns an appropriate error for group key duplicated in ids', function() {
 			const result = getErrorForInfo({
 				type: 'duplication',
 				keyType: 'group',
@@ -94,35 +94,35 @@ describe('Internal utils', function() {
 
 			expect(result).to.be.an.instanceof(KeyError);
 			expect(result.message).to.equal(
-				'Group key \'foo\' also appears in values'
+				'Group key \'foo\' also appears in ids'
 			);
 			expect(result.info).to.deep.equal({ key: 'foo' });
 		});
 
-		it('returns an appropriate error for collision between values', function() {
+		it('returns an appropriate error for collision between ids', function() {
 			const result = getErrorForInfo({
-				type: 'valueCollision',
-				keyType: 'value',
+				type: 'idCollision',
+				keyType: 'id',
 				key: 'foo',
 			});
 
 			expect(result).to.be.an.instanceof(KeyError);
 			expect(result.message).to.equal(
-				'Value \'foo\' has already been added'
+				'Id \'foo\' has already been added'
 			);
 			expect(result.info).to.deep.equal({ key: 'foo' });
 		});
 
 		it('returns an appropriate error for collision with a new group key', function() {
 			const result = getErrorForInfo({
-				type: 'valueCollision',
+				type: 'idCollision',
 				keyType: 'group',
 				key: 'foo',
 			});
 
 			expect(result).to.be.an.instanceof(KeyError);
 			expect(result.message).to.equal(
-				'Group key \'foo\' is already in use as a value'
+				'Group key \'foo\' is already in use as an id'
 			);
 			expect(result.info).to.deep.equal({ key: 'foo' });
 		});
@@ -130,13 +130,13 @@ describe('Internal utils', function() {
 		it('returns an appropriate error for collision with an existing group key', function() {
 			const result = getErrorForInfo({
 				type: 'groupCollision',
-				keyType: 'value',
+				keyType: 'id',
 				key: 'foo',
 			});
 
 			expect(result).to.be.an.instanceof(KeyError);
 			expect(result.message).to.equal(
-				'Value \'foo\' is already in use as a group key'
+				'Id \'foo\' is already in use as a group key'
 			);
 			expect(result.info).to.deep.equal({ key: 'foo' });
 		});

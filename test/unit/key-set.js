@@ -22,12 +22,12 @@ describe('KeySet', function() {
 			expect(KeySet._normalizeArgs).to.be.calledWith([ 'foo', 'bar' ]);
 		});
 
-		it('stores values from normalized args', function() {
-			const values = options.values = [ 'value1', 'value2' ];
+		it('stores ids from normalized args', function() {
+			const ids = options.ids = [ 'id1', 'id2' ];
 
 			const keySet = new KeySet();
 
-			expect(keySet.values).to.equal(values);
+			expect(keySet.ids).to.equal(ids);
 		});
 
 		it('stores before from normalized args', function() {
@@ -68,7 +68,7 @@ describe('KeySet', function() {
 	});
 
 	describe('#validate', function() {
-		const existingKeys = { items: [], groups: [] };
+		const existingKeys = { ids: [], groups: [] };
 		const errors = [ new Error('foo'), new Error('bar') ];
 		let keySet;
 
@@ -109,7 +109,7 @@ describe('KeySet', function() {
 	});
 
 	describe('#_getErrors', function() {
-		const existingKeys = { items: [], groups: [] };
+		const existingKeys = { ids: [], groups: [] };
 		const fooInfo = { name: 'foo' };
 		const barInfo = { name: 'bar' };
 		const fooErr = new Error('foo');
@@ -144,7 +144,7 @@ describe('KeySet', function() {
 	});
 
 	describe('#_getErrorInfo', function() {
-		const existingKeys = { items: [], groups: [] };
+		const existingKeys = { ids: [], groups: [] };
 		let keySet, result;
 
 		beforeEach(function() {
@@ -180,16 +180,16 @@ describe('KeySet', function() {
 	describe('#_getInvalidKeyInfo', function() {
 		it('returns info objects for empty or non-string keys', function() {
 			const keySet = new KeySet({
-				values: [ 'value1', 42, { foo: 'bar' }, 'value2', '' ],
+				ids: [ 'id1', 42, { foo: 'bar' }, 'id2', '' ],
 				before: [ '', 'before1', 0, 'before2' ],
 				after: [ 'after1', 'after2', '', false ],
 				group: 'group key',
 			});
 
 			expect(keySet._getInvalidKeyInfo()).to.deep.equal([
-				{ type: 'invalidKey', keyType: 'value', key: 42 },
-				{ type: 'invalidKey', keyType: 'value', key: { foo: 'bar' } },
-				{ type: 'invalidKey', keyType: 'value', key: '' },
+				{ type: 'invalidKey', keyType: 'id', key: 42 },
+				{ type: 'invalidKey', keyType: 'id', key: { foo: 'bar' } },
+				{ type: 'invalidKey', keyType: 'id', key: '' },
 				{ type: 'invalidKey', keyType: 'before', key: '' },
 				{ type: 'invalidKey', keyType: 'before', key: 0 },
 				{ type: 'invalidKey', keyType: 'after', key: '' },
@@ -199,14 +199,14 @@ describe('KeySet', function() {
 
 		it('appends info for group key, it it is not a string', function() {
 			const keySet = new KeySet({
-				values: true,
+				ids: true,
 				before: 42,
 				after: 0,
 				group: false,
 			});
 
 			expect(keySet._getInvalidKeyInfo()).to.deep.equal([
-				{ type: 'invalidKey', keyType: 'value', key: true },
+				{ type: 'invalidKey', keyType: 'id', key: true },
 				{ type: 'invalidKey', keyType: 'before', key: 42 },
 				{ type: 'invalidKey', keyType: 'after', key: 0 },
 				{ type: 'invalidKey', keyType: 'group', key: false },
@@ -236,26 +236,26 @@ describe('KeySet', function() {
 			sinon.stub(utils, 'getDuplicates').returns([ 'dup1', 'dup2' ]);
 		});
 
-		it('gets duplicate values', function() {
+		it('gets duplicate ids', function() {
 			keySet._getDuplicationInfo();
 
 			expect(utils.getDuplicates).to.be.calledOnce;
-			expect(utils.getDuplicates).to.be.calledWith(keySet.values);
+			expect(utils.getDuplicates).to.be.calledWith(keySet.ids);
 		});
 
-		it('maps duplicate values to objects with necessary info', function() {
+		it('maps duplicate ids to objects with necessary info', function() {
 			expect(keySet._getDuplicationInfo()).to.deep.equal([
-				{ type: 'duplication', keyType: 'value', key: 'dup1' },
-				{ type: 'duplication', keyType: 'value', key: 'dup2' },
+				{ type: 'duplication', keyType: 'id', key: 'dup1' },
+				{ type: 'duplication', keyType: 'id', key: 'dup2' },
 			]);
 		});
 
-		it('appends object for group key being duplicated in values', function() {
+		it('appends object for group key being duplicated in ids', function() {
 			keySet.group = 'bar';
 
 			expect(keySet._getDuplicationInfo()).to.deep.equal([
-				{ type: 'duplication', keyType: 'value', key: 'dup1' },
-				{ type: 'duplication', keyType: 'value', key: 'dup2' },
+				{ type: 'duplication', keyType: 'id', key: 'dup1' },
+				{ type: 'duplication', keyType: 'id', key: 'dup2' },
 				{ type: 'duplication', keyType: 'group', key: 'bar' },
 			]);
 		});
@@ -267,51 +267,51 @@ describe('KeySet', function() {
 		beforeEach(function() {
 			keySet = new KeySet('foo', 'bar', { group: 'baz' });
 			existingKeys = {
-				items: [ 'existingValue1', 'existingValue2' ],
+				ids: [ 'existingId1', 'existingId2' ],
 				groups: [ 'existingGroup1', 'existingGroup2' ],
 			};
 
 			sinon.stub(_, 'intersection')
-				.withArgs(keySet.values, existingKeys.items)
+				.withArgs(keySet.ids, existingKeys.ids)
 				.returns([ 'wtf', 'omg' ])
-				.withArgs(keySet.values, existingKeys.groups)
+				.withArgs(keySet.ids, existingKeys.groups)
 				.returns([ 'wow', 'ffs' ]);
 		});
 
-		it('gets intersections of values with existing keys', function() {
+		it('gets intersections of ids with existing keys', function() {
 			keySet._getCollisionInfo(existingKeys);
 
 			expect(_.intersection).to.be.calledTwice;
 			expect(_.intersection).to.be.calledWithExactly(
-				keySet.values,
-				existingKeys.items
+				keySet.ids,
+				existingKeys.ids
 			);
 			expect(_.intersection).to.be.calledWithExactly(
-				keySet.values,
+				keySet.ids,
 				existingKeys.groups
 			);
 		});
 
 		it('maps intersection results to info objects', function() {
 			expect(keySet._getCollisionInfo(existingKeys)).to.deep.equal([
-				{ type: 'valueCollision', key: 'wtf', keyType: 'value' },
-				{ type: 'valueCollision', key: 'omg', keyType: 'value' },
-				{ type: 'groupCollision', key: 'wow', keyType: 'value' },
-				{ type: 'groupCollision', key: 'ffs', keyType: 'value' },
+				{ type: 'idCollision', key: 'wtf', keyType: 'id' },
+				{ type: 'idCollision', key: 'omg', keyType: 'id' },
+				{ type: 'groupCollision', key: 'wow', keyType: 'id' },
+				{ type: 'groupCollision', key: 'ffs', keyType: 'id' },
 			]);
 		});
 
-		it('appends info for group key colliding with existing values', function() {
-			keySet.group = 'existingValue1';
+		it('appends info for group key colliding with existing ids', function() {
+			keySet.group = 'existingId1';
 
 			expect(keySet._getCollisionInfo(existingKeys)).to.deep.equal([
-				{ type: 'valueCollision', key: 'wtf', keyType: 'value' },
-				{ type: 'valueCollision', key: 'omg', keyType: 'value' },
-				{ type: 'groupCollision', key: 'wow', keyType: 'value' },
-				{ type: 'groupCollision', key: 'ffs', keyType: 'value' },
+				{ type: 'idCollision', key: 'wtf', keyType: 'id' },
+				{ type: 'idCollision', key: 'omg', keyType: 'id' },
+				{ type: 'groupCollision', key: 'wow', keyType: 'id' },
+				{ type: 'groupCollision', key: 'ffs', keyType: 'id' },
 				{
-					type: 'valueCollision',
-					key: 'existingValue1',
+					type: 'idCollision',
+					key: 'existingId1',
 					keyType: 'group',
 				},
 			]);
@@ -320,17 +320,17 @@ describe('KeySet', function() {
 
 	describe('::_normalizeArgs', function() {
 		const args = [ 'arg1', 'arg2' ];
-		const normalizedValues = [ 'normalized1', 'normalized2' ];
-		const flattenedValues = [ 'flattened1', 'flattened2' ];
+		const normalizedIds = [ 'normalized1', 'normalized2' ];
+		const flattenedIds = [ 'flattened1', 'flattened2' ];
 		let normalizedArgs, result;
 
 		beforeEach(function() {
-			normalizedArgs = { foo: 'bar', values: normalizedValues };
+			normalizedArgs = { foo: 'bar', ids: normalizedIds };
 
 			sinon.stub(KeySet, '_normalizeUnflattenedArgs')
 				.returns(normalizedArgs);
 
-			sinon.stub(_, 'flatten').returns(flattenedValues);
+			sinon.stub(_, 'flatten').returns(flattenedIds);
 
 			result = KeySet._normalizeArgs(args);
 		});
@@ -345,32 +345,32 @@ describe('KeySet', function() {
 			expect(result).to.equal(normalizedArgs);
 		});
 
-		it('flattens normalized values', function() {
+		it('flattens normalized ids', function() {
 			expect(_.flatten).to.be.calledOnce;
-			expect(_.flatten).to.be.calledWith(normalizedValues);
+			expect(_.flatten).to.be.calledWith(normalizedIds);
 		});
 
-		it('overwites values with flattened values in result', function() {
+		it('overwites ids with flattened ids in result', function() {
 			expect(result).to.deep.equal({
 				foo: 'bar',
-				values: flattenedValues,
+				ids: flattenedIds,
 			});
 		});
 	});
 
 	describe('::_normalizeUnflattenedArgs', function() {
 		const args = [ 'arg1', 'arg2' ];
-		const values = [ 'value1', 'value2' ];
+		const ids = [ 'id1', 'id2' ];
 		const options = { foo: 'bar' };
 		let normalizedOptions, result;
 
 		beforeEach(function() {
 			normalizedOptions = {
 				baz: 'qux',
-				values: [ 'value3', 'value4' ],
+				ids: [ 'id3', 'id4' ],
 			};
 
-			sinon.stub(KeySet, '_splitArgs').returns({ values, options });
+			sinon.stub(KeySet, '_splitArgs').returns({ ids, options });
 			sinon.stub(KeySet, '_normalizeOptions').returns(normalizedOptions);
 
 			result = KeySet._normalizeUnflattenedArgs(args);
@@ -392,10 +392,10 @@ describe('KeySet', function() {
 			expect(result).to.equal(normalizedOptions);
 		});
 
-		it('prepends arg values to options values', function() {
+		it('prepends arg ids to options ids', function() {
 			expect(result).to.deep.equal({
 				baz: 'qux',
-				values: [ 'value1', 'value2', 'value3', 'value4' ],
+				ids: [ 'id1', 'id2', 'id3', 'id4' ],
 			});
 		});
 	});
@@ -407,38 +407,38 @@ describe('KeySet', function() {
 			options = { foo: 'bar' };
 		});
 
-		it('splits array into values and options', function() {
-			const values = [ 'baz', [ 'qux' ], 'quux' ];
+		it('splits array into ids and options', function() {
+			const ids = [ 'baz', [ 'qux' ], 'quux' ];
 
-			const result = KeySet._splitArgs([ ...values, options ]);
+			const result = KeySet._splitArgs([ ...ids, options ]);
 
-			expect(result).to.deep.equal({ values, options });
+			expect(result).to.deep.equal({ ids, options });
 		});
 
 		it('defaults to empty options object', function() {
-			const values = [ [ 'baz', 'qux' ], 'quux' ];
+			const ids = [ [ 'baz', 'qux' ], 'quux' ];
 
-			const result = KeySet._splitArgs([ ...values ]);
+			const result = KeySet._splitArgs([ ...ids ]);
 
-			expect(result).to.deep.equal({ values, options: {} });
+			expect(result).to.deep.equal({ ids, options: {} });
 		});
 	});
 
 	describe('::_normalizeOptions', function() {
-		const values = 'values value';
-		const normalizedValues = 'normalized values value';
-		const before = 'before value';
-		const normalizedBefore = 'normalized before value';
-		const after = 'after value';
-		const normalizedAfter = 'normalized after value';
-		const originalOptions = { foo: 'bar', values, before, after };
+		const ids = [ 'id1', 'id2' ];
+		const normalizedIds = [ 'normalizedId1', 'normalizedId2' ];
+		const before = [ 'before1', 'before2' ];
+		const normalizedBefore = [ 'normalizedBefore1', 'normalizedBefore2' ];
+		const after = [ 'after1', 'after2' ];
+		const normalizedAfter = [ 'normalizedAfter1', 'normalizedAfter2' ];
+		const originalOptions = { foo: 'bar', ids, before, after };
 		let options;
 
 		beforeEach(function() {
 			options = _.clone(originalOptions);
 
 			sinon.stub(utils, 'normalizeArrayOption')
-				.withArgs(values).returns(normalizedValues)
+				.withArgs(ids).returns(normalizedIds)
 				.withArgs(before).returns(normalizedBefore)
 				.withArgs(after).returns(normalizedAfter);
 		});
@@ -447,7 +447,7 @@ describe('KeySet', function() {
 			KeySet._normalizeOptions(options);
 
 			expect(utils.normalizeArrayOption).to.be.calledThrice;
-			expect(utils.normalizeArrayOption).to.be.calledWith(values);
+			expect(utils.normalizeArrayOption).to.be.calledWith(ids);
 			expect(utils.normalizeArrayOption).to.be.calledWith(before);
 			expect(utils.normalizeArrayOption).to.be.calledWith(after);
 		});
@@ -457,7 +457,7 @@ describe('KeySet', function() {
 
 			expect(result).to.deep.equal({
 				foo: 'bar',
-				values: normalizedValues,
+				ids: normalizedIds,
 				before: normalizedBefore,
 				after: normalizedAfter,
 			});
