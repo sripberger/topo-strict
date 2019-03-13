@@ -9,7 +9,16 @@ describe('Graph', function() {
 	});
 
 	it('creates an object to store nodes by id', function() {
-		expect(graph.nodes).to.deep.equal({});
+		expect(graph.nodesById).to.deep.equal({});
+	});
+
+	describe('@nodes', function() {
+		it('returns array of all node values', function() {
+			const fooNode = graph.nodesById.foo = { id: 'foo' };
+			const barNode = graph.nodesById.bar = { id: 'bar' };
+
+			expect(graph.nodes).to.deep.equal([ fooNode, barNode ]);
+		});
 	});
 
 	describe('#addNode', function() {
@@ -17,13 +26,13 @@ describe('Graph', function() {
 			graph.addNode('foo');
 			graph.addNode('bar');
 
-			expect(graph.nodes).to.have.keys('foo', 'bar');
-			expect(graph.nodes.foo).to.deep.equal({ id: 'foo', edges: [] });
-			expect(graph.nodes.bar).to.deep.equal({ id: 'bar', edges: [] });
+			expect(graph.nodesById).to.have.keys('foo', 'bar');
+			expect(graph.nodesById.foo).to.deep.equal({ id: 'foo', edges: [] });
+			expect(graph.nodesById.bar).to.deep.equal({ id: 'bar', edges: [] });
 		});
 
 		it('throws without adding if id already has a node', function() {
-			const fooNode = graph.nodes.foo = { id: 'foo', edges: [] };
+			const fooNode = graph.nodesById.foo = { id: 'foo', edges: [] };
 
 			expect(() => {
 				graph.addNode('foo');
@@ -34,7 +43,7 @@ describe('Graph', function() {
 				expect(err.info).to.deep.equal({ key: 'foo' });
 				return true;
 			});
-			expect(graph.nodes.foo).to.equal(fooNode);
+			expect(graph.nodesById.foo).to.equal(fooNode);
 		});
 	});
 
@@ -42,9 +51,9 @@ describe('Graph', function() {
 		let fooNode, barNode, bazNode;
 
 		beforeEach(function() {
-			fooNode = graph.nodes.foo = { id: 'foo', edges: [] };
-			barNode = graph.nodes.bar = { id: 'bar', edges: [ fooNode ] };
-			bazNode = graph.nodes.baz = { id: 'baz', edges: [] };
+			fooNode = graph.nodesById.foo = { id: 'foo', edges: [] };
+			barNode = graph.nodesById.bar = { id: 'bar', edges: [ fooNode ] };
+			bazNode = graph.nodesById.baz = { id: 'baz', edges: [] };
 		});
 
 		it('appends `to` node to `from` node\'s edges', function() {
