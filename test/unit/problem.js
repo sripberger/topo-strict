@@ -16,16 +16,26 @@ describe('Problem', function() {
 		expect(problem.groups).to.deep.equal({});
 	});
 
-	describe('@keys', function() {
+	describe('@keysByType', function() {
 		it('returns categorized keys from ids and groups', function() {
 			problem.ids = { foo: {}, bar: {} };
 			problem.groups = { baz: [], qux: [] };
 			problem.randomProp = { omg: 'wtf' };
 
-			expect(problem.keys).to.deep.equal({
+			expect(problem.keysByType).to.deep.equal({
 				ids: [ 'foo', 'bar' ],
 				groups: [ 'baz', 'qux' ],
 			});
+		});
+	});
+
+	describe('@keys', function() {
+		it('returns all keys in an array', function() {
+			problem.ids = { foo: {}, bar: {} };
+			problem.groups = { baz: [], qux: [] };
+			problem.randomProp = { omg: 'wtf' };
+
+			expect(problem.keys).to.deep.equal([ 'foo', 'bar', 'baz', 'qux' ]);
 		});
 	});
 
@@ -47,16 +57,16 @@ describe('Problem', function() {
 			expect(keySetModule.KeySet).to.be.calledWith('foo', 'bar');
 		});
 
-		it('validates the key set with existing keys', function() {
-			const existingKeys = {};
-			sinon.stub(problem, 'keys').get(() => existingKeys);
+		it('validates the key set with existing keys by type', function() {
+			const keysByType = {};
+			sinon.stub(problem, 'keysByType').get(() => keysByType);
 
 			problem.add();
 
 			expect(keySet.validate).to.be.calledOnce;
 			expect(keySet.validate).to.be.calledOn(keySet);
 			expect(keySet.validate).to.be.calledWith(
-				sinon.match.same(existingKeys)
+				sinon.match.same(keysByType)
 			);
 		});
 
@@ -142,6 +152,30 @@ describe('Problem', function() {
 
 			expect(problem.groups).to.have.keys('baz');
 			expect(problem.groups.baz).to.deep.equal([ 'qux', 'foo', 'bar' ]);
+		});
+	});
+
+	describe('#_getErrorInfo', function() {
+		it('gets info objects for any constraint keys with no target', function() {
+			problem.ids = {
+				id1: {
+					before: [ 'id2', 'foo', 'bar', 'group1', 'baz' ],
+					after: [ 'id3', 'qux', 'group2' ],
+				},
+				id2: { before: [ 'omg', 'group1', 'wow', 'id3' ] },
+				id3: { after: [ 'wtf', 'group2' ] },
+			};
+			problem.groups = { group1: [], group2: [] };
+
+			expect(problem._getErrorInfo()).to.deep.equal([
+				{ type: 'invalidConstraint', keyType: 'before', key: 'foo' },
+				{ type: 'invalidConstraint', keyType: 'before', key: 'bar' },
+				{ type: 'invalidConstraint', keyType: 'before', key: 'baz' },
+				{ type: 'invalidConstraint', keyType: 'after', key: 'qux' },
+				{ type: 'invalidConstraint', keyType: 'before', key: 'omg' },
+				{ type: 'invalidConstraint', keyType: 'before', key: 'wow' },
+				{ type: 'invalidConstraint', keyType: 'after', key: 'wtf' },
+			]);
 		});
 	});
 });
