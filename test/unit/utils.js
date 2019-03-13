@@ -140,6 +140,34 @@ describe('Internal utils', function() {
 			);
 			expect(result.info).to.deep.equal({ key: 'foo' });
 		});
+
+		it('returns an appropriate error for a before key with no target', function() {
+			const result = getErrorForInfo({
+				type: 'missingTarget',
+				keyType: 'before',
+				key: 'foo',
+			});
+
+			expect(result).to.be.an.instanceof(KeyError);
+			expect(result.message).to.equal(
+				'Before key \'foo\' does not exist'
+			);
+			expect(result.info).to.deep.equal({ key: 'foo' });
+		});
+
+		it('returns an appropriate error for an after key with no target', function() {
+			const result = getErrorForInfo({
+				type: 'missingTarget',
+				keyType: 'after',
+				key: 'foo',
+			});
+
+			expect(result).to.be.an.instanceof(KeyError);
+			expect(result.message).to.equal(
+				'After key \'foo\' does not exist'
+			);
+			expect(result.info).to.deep.equal({ key: 'foo' });
+		});
 	});
 
 	describe('isInvalidKey', function() {

@@ -173,13 +173,13 @@ describe('Problem', function() {
 			problem.groups = { group1: [], group2: [] };
 
 			expect(problem._getErrorInfo()).to.deep.equal([
-				{ type: 'invalidConstraint', keyType: 'before', key: 'foo' },
-				{ type: 'invalidConstraint', keyType: 'before', key: 'bar' },
-				{ type: 'invalidConstraint', keyType: 'before', key: 'baz' },
-				{ type: 'invalidConstraint', keyType: 'after', key: 'qux' },
-				{ type: 'invalidConstraint', keyType: 'before', key: 'omg' },
-				{ type: 'invalidConstraint', keyType: 'before', key: 'wow' },
-				{ type: 'invalidConstraint', keyType: 'after', key: 'wtf' },
+				{ type: 'missingTarget', keyType: 'before', key: 'foo' },
+				{ type: 'missingTarget', keyType: 'before', key: 'bar' },
+				{ type: 'missingTarget', keyType: 'before', key: 'baz' },
+				{ type: 'missingTarget', keyType: 'after', key: 'qux' },
+				{ type: 'missingTarget', keyType: 'before', key: 'omg' },
+				{ type: 'missingTarget', keyType: 'before', key: 'wow' },
+				{ type: 'missingTarget', keyType: 'after', key: 'wtf' },
 			]);
 		});
 	});
