@@ -70,6 +70,19 @@ describe('KeySet', function() {
 		});
 	});
 
+	describe('#validate', function() {
+		it('passes through to #_validate', function() {
+			const keySet = new KeySet();
+			sinon.stub(keySet, '_validate');
+
+			keySet.validate('foo', 'bar');
+
+			expect(keySet._validate).to.be.calledOnce;
+			expect(keySet._validate).to.be.calledOn(keySet);
+			expect(keySet._validate).to.be.calledWith('foo', 'bar');
+		});
+	});
+
 	describe('#_getErrorInfo', function() {
 		const existingKeys = { ids: [], groups: [] };
 		let keySet, result;

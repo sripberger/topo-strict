@@ -10,7 +10,7 @@ describe('Validatable', function() {
 		validatable = new Validatable();
 	});
 
-	describe('#validate', function() {
+	describe('#_validate', function() {
 		const errors = [ new Error('foo'), new Error('bar') ];
 
 		beforeEach(function() {
@@ -19,7 +19,7 @@ describe('Validatable', function() {
 		});
 
 		it('gets errors with the same args', function() {
-			validatable.validate('bar', 'baz');
+			validatable._validate('bar', 'baz');
 
 			expect(validatable._getErrors).to.be.calledOnce;
 			expect(validatable._getErrors).to.be.calledOn(validatable);
@@ -27,7 +27,7 @@ describe('Validatable', function() {
 		});
 
 		it('wraps errors using nani::fromArray', function() {
-			validatable.validate();
+			validatable._validate();
 
 			expect(nani.fromArray).to.be.calledOnce;
 			expect(nani.fromArray).to.be.calledWith(errors);
@@ -38,7 +38,7 @@ describe('Validatable', function() {
 			nani.fromArray.returns(errorFromArray);
 
 			expect(() => {
-				validatable.validate();
+				validatable._validate();
 			}).to.throw(ValidationError).that.satisfies((err) => {
 				const defaultMessage = ValidationError.getDefaultMessage();
 				expect(err.shortMessage).to.equal(defaultMessage);

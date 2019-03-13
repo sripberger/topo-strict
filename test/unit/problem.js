@@ -188,16 +188,16 @@ describe('Problem', function() {
 	describe('#toGraph', function() {
 		it('validates instance before returning the full graph', function() {
 			const graph = sinon.createStubInstance(graphModule.Graph);
-			sinon.stub(problem, 'validate');
+			sinon.stub(problem, '_validate');
 			sinon.stub(problem, '_toFullGraph').returns(graph);
 
 			const result = problem.toGraph();
 
-			expect(problem.validate).to.be.calledOnce;
-			expect(problem.validate).to.be.calledOn(problem);
+			expect(problem._validate).to.be.calledOnce;
+			expect(problem._validate).to.be.calledOn(problem);
 			expect(problem._toFullGraph).to.be.calledOnce;
 			expect(problem._toFullGraph).to.be.calledOn(problem);
-			expect(problem._toFullGraph).to.be.calledAfter(problem.validate);
+			expect(problem._toFullGraph).to.be.calledAfter(problem._validate);
 			expect(result).to.equal(graph);
 		});
 	});
