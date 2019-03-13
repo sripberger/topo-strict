@@ -1,11 +1,16 @@
 import * as keySetModule from '../../lib/key-set';
 import { Problem } from '../../lib/problem';
+import { Validatable } from '../../lib/validatable';
 
 describe('Problem', function() {
 	let problem;
 
 	beforeEach(function() {
 		problem = new Problem();
+	});
+
+	it('extends Validatable', function() {
+		expect(problem).to.be.an.instanceof(Validatable);
 	});
 
 	it('creates an object for storing ids with their constraints', function() {

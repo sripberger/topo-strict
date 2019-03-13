@@ -1,10 +1,13 @@
-import * as nani from 'nani';
 import * as utils from '../../lib/utils';
 import { KeySet } from '../../lib/key-set';
-import { ValidationError } from '../../lib/validation-error';
+import { Validatable } from '../../lib/validatable';
 import _ from 'lodash';
 
 describe('KeySet', function() {
+	it('extends Validatable', function() {
+		expect(new KeySet()).to.be.an.instanceof(Validatable);
+	});
+
 	describe('constructor', function() {
 		let options;
 
@@ -64,82 +67,6 @@ describe('KeySet', function() {
 			const keySet = new KeySet();
 
 			expect(keySet.group).to.be.false;
-		});
-	});
-
-	describe('#validate', function() {
-		const existingKeys = { ids: [], groups: [] };
-		const errors = [ new Error('foo'), new Error('bar') ];
-		let keySet;
-
-		beforeEach(function() {
-			keySet = new KeySet();
-			sinon.stub(keySet, '_getErrors').returns(errors);
-			sinon.stub(nani, 'fromArray').returns(null);
-		});
-
-		it('gets errors based on existing keys', function() {
-			keySet.validate(existingKeys);
-
-			expect(keySet._getErrors).to.be.calledOnce;
-			expect(keySet._getErrors).to.be.calledOn(keySet);
-			expect(keySet._getErrors).to.be.calledWith(existingKeys);
-		});
-
-		it('wraps errors using nani.fromArray', function() {
-			keySet.validate(existingKeys);
-
-			expect(nani.fromArray).to.be.calledOnce;
-			expect(nani.fromArray).to.be.calledWith(errors);
-		});
-
-		it('throws a ValidationError if fromArray result is not null', function() {
-			const errorFromArray = new Error('Error from array');
-			nani.fromArray.returns(errorFromArray);
-
-			expect(() => {
-				keySet.validate(existingKeys);
-			}).to.throw(ValidationError).that.satisfies((err) => {
-				const defaultMessage = ValidationError.getDefaultMessage();
-				expect(err.shortMessage).to.equal(defaultMessage);
-				expect(err.cause).to.equal(errorFromArray);
-				return true;
-			});
-		});
-	});
-
-	describe('#_getErrors', function() {
-		const existingKeys = { ids: [], groups: [] };
-		const fooInfo = { name: 'foo' };
-		const barInfo = { name: 'bar' };
-		const fooErr = new Error('foo');
-		const barErr = new Error('bar');
-		let keySet, result;
-
-		beforeEach(function() {
-			keySet = new KeySet();
-			sinon.stub(keySet, '_getErrorInfo').returns([ fooInfo, barInfo ]);
-			sinon.stub(utils, 'getErrorForInfo')
-				.withArgs(fooInfo).returns(fooErr)
-				.withArgs(barInfo).returns(barErr);
-
-			result = keySet._getErrors(existingKeys);
-		});
-
-		it('gets error info', function() {
-			expect(keySet._getErrorInfo).to.be.calledOnce;
-			expect(keySet._getErrorInfo).to.be.calledOn(keySet);
-			expect(keySet._getErrorInfo).to.be.calledWith(existingKeys);
-		});
-
-		it('gets error for each info', function() {
-			expect(utils.getErrorForInfo).to.be.calledTwice;
-			expect(utils.getErrorForInfo).to.be.calledWith(fooInfo);
-			expect(utils.getErrorForInfo).to.be.calledWith(barInfo);
-		});
-
-		it('returns fetched errors', function() {
-			expect(result).to.deep.equal([ fooErr, barErr ]);
 		});
 	});
 
