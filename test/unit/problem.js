@@ -1,3 +1,4 @@
+import * as graphModule from '../../lib/graph';
 import * as keySetModule from '../../lib/key-set';
 import { Problem } from '../../lib/problem';
 import { Validatable } from '../../lib/validatable';
@@ -181,6 +182,121 @@ describe('Problem', function() {
 				{ type: 'missingTarget', keyType: 'before', key: 'wow' },
 				{ type: 'missingTarget', keyType: 'after', key: 'wtf' },
 			]);
+		});
+	});
+
+	describe('#toGraph', function() {
+		it('validates instance before returning the full graph', function() {
+			const graph = sinon.createStubInstance(graphModule.Graph);
+			sinon.stub(problem, 'validate');
+			sinon.stub(problem, '_toFullGraph').returns(graph);
+
+			const result = problem.toGraph();
+
+			expect(problem.validate).to.be.calledOnce;
+			expect(problem.validate).to.be.calledOn(problem);
+			expect(problem._toFullGraph).to.be.calledOnce;
+			expect(problem._toFullGraph).to.be.calledOn(problem);
+			expect(problem._toFullGraph).to.be.calledAfter(problem.validate);
+			expect(result).to.equal(graph);
+		});
+	});
+
+	describe('#_toFullGraph', function() {
+		let graph, groupsApplied, result;
+
+		beforeEach(function() {
+			graph = sinon.createStubInstance(graphModule.Graph);
+			groupsApplied = {
+				id1: { before: [ 'foo', 'bar' ], after: [ 'baz', 'qux' ] },
+				id2: { before: [ 'wtf', 'omg', 'wow' ] },
+				id3: { after: [ 'ffs' ] },
+			};
+			sinon.stub(problem, '_toGraphWithNodes').returns(graph);
+			sinon.stub(problem, '_applyGroups').returns(groupsApplied);
+
+			result = problem._toFullGraph();
+		});
+
+		it('gets the graph with nodes', function() {
+			expect(problem._toGraphWithNodes).to.be.calledOnce;
+			expect(problem._toGraphWithNodes).to.be.calledOn(problem);
+		});
+
+		it('applies groups to constraints', function() {
+			expect(problem._applyGroups).to.be.calledOnce;
+			expect(problem._applyGroups).to.be.calledOn(problem);
+		});
+
+		it('adds edges to the graph for all constraints', function() {
+			expect(graph.addEdge).to.have.callCount(8);
+			expect(graph.addEdge).to.always.be.calledOn(graph);
+			expect(graph.addEdge).to.be.calledWith('id1', 'foo');
+			expect(graph.addEdge).to.be.calledWith('id1', 'bar');
+			expect(graph.addEdge).to.be.calledWith('baz', 'id1');
+			expect(graph.addEdge).to.be.calledWith('qux', 'id1');
+			expect(graph.addEdge).to.be.calledWith('id2', 'wtf');
+			expect(graph.addEdge).to.be.calledWith('id2', 'omg');
+			expect(graph.addEdge).to.be.calledWith('id2', 'wow');
+			expect(graph.addEdge).to.be.calledWith('ffs', 'id3');
+		});
+
+		it('returns the graph', function() {
+			expect(result).to.equal(graph);
+		});
+	});
+
+	describe('#_toGraphWithNodes', function() {
+		let graph, result;
+
+		beforeEach(function() {
+			graph = sinon.createStubInstance(graphModule.Graph);
+			sinon.stub(graphModule, 'Graph').returns(graph);
+			problem.ids = { foo: {}, bar: {} };
+
+			result = problem._toGraphWithNodes();
+		});
+
+		it('creates a graph', function() {
+			expect(graphModule.Graph).to.be.calledOnce;
+			expect(graphModule.Graph).to.be.calledWithNew;
+		});
+
+		it('adds id keys as nodes to the graph', function() {
+			expect(graph.addNode).to.be.calledTwice;
+			expect(graph.addNode).to.always.be.calledOn(graph);
+			expect(graph.addNode).to.be.calledWith('foo');
+			expect(graph.addNode).to.be.calledWith('bar');
+		});
+
+		it('returns the created graph', function() {
+			expect(result).to.equal(graph);
+		});
+	});
+
+	describe('#_applyGroups', function() {
+		it('returns constraints by id with groups applied', function() {
+			problem.ids = {
+				id1: {
+					before: [ 'id2', 'group1' ],
+					after: [ 'id3', 'group2' ],
+				},
+				id2: { before: [ 'group1', 'group2', 'id3' ] },
+				id3: { after: [ 'group2' ] },
+			};
+			problem.groups = {
+				group1: [ 'foo', 'bar' ],
+				group2: [ 'baz' ],
+			};
+
+			expect(problem._applyGroups()).to.deep.equal({
+				id1: {
+					before: [ 'id2', 'foo', 'bar' ],
+					after: [ 'id3', 'baz' ],
+				},
+				id2: { before: [ 'foo', 'bar', 'baz', 'id3' ] },
+				id3: { after: [ 'baz' ] },
+			});
 		});
 	});
 });
