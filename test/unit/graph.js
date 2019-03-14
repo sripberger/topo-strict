@@ -120,7 +120,7 @@ describe('Graph', function() {
 			);
 		});
 
-		it('skips edges, if there are none', function() {
+		it('skips edge section, if there are none', function() {
 			graph.nodesById = {
 				foo: { id: 'foo', edges: [] },
 				bar: { id: 'bar', edges: [] },

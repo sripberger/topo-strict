@@ -128,7 +128,7 @@ describe('Problem', function() {
 			);
 		});
 
-		it('skips groups if there are none', function() {
+		it('skips groups section if there are none', function() {
 			problem.ids = { foo: {}, bar: {} };
 
 			expect(problem.toString()).to.equal(
@@ -139,7 +139,7 @@ describe('Problem', function() {
 			);
 		});
 
-		it('skips ids if there are none', function() {
+		it('skips ids section if there are none', function() {
 			problem.groups = { foo: [], bar: [] };
 
 			expect(problem.toString()).to.equal(
