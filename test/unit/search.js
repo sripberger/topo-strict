@@ -38,17 +38,15 @@ describe('Search', function() {
 		let search, result;
 
 		beforeEach(function() {
-			const nodeQueue = [ fooNode, barNode, bazNode ];
-
 			search = new Search();
+
+			const nodeQueue = [ fooNode, barNode, bazNode ];
 			search.nodes = new Set(nodeQueue);
 
-			sinon.stub(search, '_getNextNode').callsFake(() => {
-				const node = nodeQueue.shift();
-				search.nodes = new Set(nodeQueue);
-				return node;
+			sinon.stub(search, '_getNextNode').callsFake(() => nodeQueue[0]);
+			sinon.stub(search, '_visitNode').callsFake(() => {
+				search.nodes.delete(nodeQueue.shift());
 			});
-			sinon.stub(search, '_visitNode');
 
 			result = search.run();
 		});
@@ -65,7 +63,7 @@ describe('Search', function() {
 			]);
 		});
 
-		it('returns search result', function() {
+		it('returns search result when finished', function() {
 			expect(result).to.equal(search.result);
 		});
 	});
