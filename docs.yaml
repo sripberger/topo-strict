@@ -1,2 +1,13 @@
 # Config file for generated documentation, as described here:
 # https://github.com/documentationjs/documentation/blob/master/docs/CONFIG.md
+
+toc:
+    - name: Classes
+    - Problem
+    - Graph
+
+    - name: Error Classes
+    - TopoStrictError
+    - ValidationError
+    - KeyError
+    - CycleError
