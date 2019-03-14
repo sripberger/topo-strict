@@ -92,6 +92,40 @@ describe('Problem', function() {
 		});
 	});
 
+	describe('#toGraph', function() {
+		it('validates instance before returning the full graph', function() {
+			const graph = sinon.createStubInstance(graphModule.Graph);
+			sinon.stub(problem, '_validate');
+			sinon.stub(problem, '_toFullGraph').returns(graph);
+
+			const result = problem.toGraph();
+
+			expect(problem._validate).to.be.calledOnce;
+			expect(problem._validate).to.be.calledOn(problem);
+			expect(problem._toFullGraph).to.be.calledOnce;
+			expect(problem._toFullGraph).to.be.calledOn(problem);
+			expect(problem._toFullGraph).to.be.calledAfter(problem._validate);
+			expect(result).to.equal(graph);
+		});
+	});
+
+	describe('#solve', function() {
+		it('converts the instance to a graph and returns its solution', function() {
+			const graph = sinon.createStubInstance(graphModule.Graph);
+			const solution = [ 'foo', 'bar' ];
+			graph.solve.returns(solution);
+			sinon.stub(problem, 'toGraph').returns(graph);
+
+			const result = problem.solve();
+
+			expect(problem.toGraph).to.be.calledOnce;
+			expect(problem.toGraph).to.be.calledOn(problem);
+			expect(graph.solve).to.be.calledOnce;
+			expect(graph.solve).to.be.calledOn(graph);
+			expect(result).to.equal(solution);
+		});
+	});
+
 	describe('#_addKeySet', function() {
 		let keySet;
 
@@ -182,23 +216,6 @@ describe('Problem', function() {
 				{ type: 'missingTarget', keyType: 'before', key: 'wow' },
 				{ type: 'missingTarget', keyType: 'after', key: 'wtf' },
 			]);
-		});
-	});
-
-	describe('#toGraph', function() {
-		it('validates instance before returning the full graph', function() {
-			const graph = sinon.createStubInstance(graphModule.Graph);
-			sinon.stub(problem, '_validate');
-			sinon.stub(problem, '_toFullGraph').returns(graph);
-
-			const result = problem.toGraph();
-
-			expect(problem._validate).to.be.calledOnce;
-			expect(problem._validate).to.be.calledOn(problem);
-			expect(problem._toFullGraph).to.be.calledOnce;
-			expect(problem._toFullGraph).to.be.calledOn(problem);
-			expect(problem._toFullGraph).to.be.calledAfter(problem._validate);
-			expect(result).to.equal(graph);
 		});
 	});
 
