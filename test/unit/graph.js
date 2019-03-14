@@ -123,5 +123,5 @@ describe('Graph', function() {
 		it('returns the search result', function() {
 			expect(result).to.equal(searchResult);
 		});
-	})
+	});
 });
