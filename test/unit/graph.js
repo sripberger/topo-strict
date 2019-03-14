@@ -97,6 +97,48 @@ describe('Graph', function() {
 		});
 	});
 
+	describe('#toString', function() {
+		it('returns a string representation of the graph', function() {
+			const fooNode = graph.nodesById.foo = { id: 'foo', edges: [] };
+			const barNode = graph.nodesById.bar = {
+				id: 'bar',
+				edges: [ fooNode ],
+			};
+			graph.nodesById.baz = { id: 'baz', edges: [ fooNode, barNode ] };
+
+			expect(graph.toString()).to.equal(
+				'nodes\n' +
+				'-----\n' +
+				'bar\n' +
+				'baz\n' +
+				'foo\n\n' +
+				'edges\n' +
+				'-----\n' +
+				'from: bar, to: foo\n' +
+				'from: baz, to: bar\n' +
+				'from: baz, to: foo'
+			);
+		});
+
+		it('skips edges, if there are none', function() {
+			graph.nodesById = {
+				foo: { id: 'foo', edges: [] },
+				bar: { id: 'bar', edges: [] },
+			};
+
+			expect(graph.toString()).to.equal(
+				'nodes\n' +
+				'-----\n' +
+				'bar\n' +
+				'foo'
+			);
+		});
+
+		it('returns an appropriate string if the graph is empty', function() {
+			expect(graph.toString()).to.equal('Empty graph');
+		});
+	});
+
 	describe('#solve', function() {
 		const searchResult = [ 'foo', 'bar' ];
 		let search, result;
