@@ -92,6 +92,69 @@ describe('Problem', function() {
 		});
 	});
 
+	describe('#toString', function() {
+		it('returns a string representation of the problem', function() {
+			problem.ids = {
+				foo: { before: [ 'omg', 'wow' ], after: [ 'wtf' ] },
+				bar: { before: [ 'wut' ] },
+				baz: { after: [ 'ffs', 'gdi' ] },
+				qux: {},
+			};
+			problem.groups = {
+				groupB: [ 'foo', 'bar' ],
+				groupA: [ 'baz' ],
+			};
+
+			expect(problem.toString()).to.equal(
+				'ids\n' +
+				'---\n' +
+				'bar\n' +
+				'    before: wut\n' +
+				'baz\n' +
+				'    after: ffs\n' +
+				'    after: gdi\n' +
+				'foo\n' +
+				'    before: omg\n' +
+				'    before: wow\n' +
+				'    after: wtf\n' +
+				'qux\n\n' +
+				'groups\n' +
+				'------\n' +
+				'groupA\n' +
+				'    baz\n' +
+				'groupB\n' +
+				'    foo\n' +
+				'    bar'
+			);
+		});
+
+		it('skips groups if there are none', function() {
+			problem.ids = { foo: {}, bar: {} };
+
+			expect(problem.toString()).to.equal(
+				'ids\n' +
+				'---\n' +
+				'bar\n' +
+				'foo'
+			);
+		});
+
+		it('skips ids if there are none', function() {
+			problem.groups = { foo: [], bar: [] };
+
+			expect(problem.toString()).to.equal(
+				'groups\n' +
+				'------\n' +
+				'bar\n' +
+				'foo'
+			);
+		});
+
+		it('returns an appropriate string if problem is empty', function() {
+			expect(problem.toString()).to.equal('Empty problem');
+		});
+	});
+
 	describe('#toGraph', function() {
 		it('validates instance before returning the full graph', function() {
 			const graph = sinon.createStubInstance(graphModule.Graph);
