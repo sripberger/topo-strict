@@ -1,3 +1,4 @@
+import * as searchModule from '../../lib/search';
 import { Graph } from '../../lib/graph';
 import { KeyError } from '../../lib/key-error';
 
@@ -95,4 +96,32 @@ describe('Graph', function() {
 			expect(bazNode.edges).to.be.empty;
 		});
 	});
+
+	describe('#solve', function() {
+		const searchResult = [ 'foo', 'bar' ];
+		let search, result;
+
+		beforeEach(function() {
+			search = sinon.createStubInstance(searchModule.Search);
+			sinon.stub(searchModule, 'Search').returns(search);
+			search.run.returns(searchResult);
+
+			result = graph.solve();
+		});
+
+		it('creates a search with the instance', function() {
+			expect(searchModule.Search).to.be.calledOnce;
+			expect(searchModule.Search).to.be.calledWithNew;
+			expect(searchModule.Search).to.be.calledWith(graph);
+		});
+
+		it('runs the search', function() {
+			expect(search.run).to.be.calledOnce;
+			expect(search.run).to.be.calledOn(search);
+		});
+
+		it('returns the search result', function() {
+			expect(result).to.equal(searchResult);
+		});
+	})
 });
