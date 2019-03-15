@@ -78,6 +78,11 @@ tell exactly what went wrong.
 
 
 ## Disadvantages vs `topo`
+- `topo-strict` does not yet support merging, as `topo` does. The rules and
+  validation approach make this feature quite a bit more complicated, so I've
+  put off implementing it until I personally need it for something. I'm happy to
+  accept contributions from anybody who might want it sooner.
+
 - The rules of `topo-strict` are obviously not always appropriate, and in
   situations where you'd rather be loose and simple you should probably use
   `topo`.
@@ -122,4 +127,100 @@ problem.add('foo', [ 'bar', 'baz' ], {
 ```
 
 ### Debugging and Visualization Features
-TODO
+If you want to see a summary of the the whole problem, you can use the
+`Problem#toString` method:
+
+```js
+console.log(morning.toString());
+/*
+ids
+---
+Eat breakfast
+Make toast
+    before: breakfast
+Nap
+    after: breakfast
+    after: prep
+Pour juice
+    before: breakfast
+
+groups
+------
+breakfast
+    Eat breakfast
+prep
+    Make toast
+    Pour juice
+*/
+```
+
+The Problem class also exposes the `#toGraph` method, which returns an instance
+of `Graph` which also implements the `#toString` and `#solve` methods. This
+allows you to preview the directed graph that's used to solve the problem before
+solving it:
+
+```js
+const morningGraph = morning.toGraph();
+
+console.log(morningGraph.toString());
+/*
+nodes
+-----
+Eat breakfast
+Make toast
+Nap
+Pour juice
+
+edges
+-----
+from: Eat breakfast, to: Nap
+from: Make toast, to: Eat breakfast
+from: Make toast, to: Nap
+from: Pour juice, to: Eat breakfast
+from: Pour juice, to: Nap
+*/
+
+console.log(morningGraph.solve());
+// [ 'Make toast', 'Pour juice', 'Eat breakfast', 'Nap' ]
+```
+
+Like `Problem#solve`, `Problem#toGraph` with throw a `ValidationError` if any
+constraint keys reference ids or group keys do not exist in the problem, and
+like `Graph#solve` will throw a `CycleError` if a cycle is detected in the
+graph.
+
+Both the Problem and Graph classes also expose `#toObject` methods, which are
+the basis for the `#toString` methods. This saves you the trouble of parsing the
+above strings, if you're looking to implement your own visualization:
+
+```js
+const { inspect } = require('util');
+
+console.log(util.inspect(morning.toObject(), { depth: null }));
+/*
+{ ids:
+   [ { key: 'Eat breakfast', constraints: [] },
+     { key: 'Make toast',
+       constraints: [ { type: 'before', key: 'breakfast' } ] },
+     { key: 'Nap',
+       constraints:
+        [ { type: 'after', key: 'breakfast' },
+          { type: 'after', key: 'prep' } ] },
+     { key: 'Pour juice',
+       constraints: [ { type: 'before', key: 'breakfast' } ] } ],
+  groups:
+   [ { key: 'breakfast', ids: [ 'Eat breakfast' ] },
+     { key: 'prep', ids: [ 'Make toast', 'Pour juice' ] } ] }
+*/
+
+console.log(util.inspect(morningGraph.toObject(), { depth: null }));
+/*
+{ nodes: [ 'Eat breakfast', 'Make toast', 'Nap', 'Pour juice' ],
+  edges:
+   [ { from: 'Eat breakfast', to: 'Nap' },
+     { from: 'Make toast', to: 'Eat breakfast' },
+     { from: 'Make toast', to: 'Nap' },
+     { from: 'Pour juice', to: 'Eat breakfast' },
+     { from: 'Pour juice', to: 'Nap' } ] }
+*/
+```
