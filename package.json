@@ -1,10 +1,17 @@
 {
   "name": "topo-strict",
   "version": "0.0.0",
-  "description": "Strict topographical sorting",
+  "description": "Strict topological sorting",
   "author": "Steve Ripberger",
   "license": "MIT",
   "repository": "github:sripberger/topo-strict",
+  "keywords": [
+    "topo",
+    "topological",
+    "sort",
+    "toposort",
+    "topsort"
+  ],
   "scripts": {
     "lint": "eslint .",
     "lintf": "eslint . --fix",
