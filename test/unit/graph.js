@@ -10,13 +10,13 @@ describe('Graph', function() {
 	});
 
 	it('creates an object to store nodes by id', function() {
-		expect(graph.nodesById).to.deep.equal({});
+		expect(graph._nodesById).to.deep.equal({});
 	});
 
 	describe('@nodes', function() {
 		it('returns array of all node values', function() {
-			const fooNode = graph.nodesById.foo = { id: 'foo' };
-			const barNode = graph.nodesById.bar = { id: 'bar' };
+			const fooNode = graph._nodesById.foo = { id: 'foo' };
+			const barNode = graph._nodesById.bar = { id: 'bar' };
 
 			expect(graph.nodes).to.deep.equal([ fooNode, barNode ]);
 		});
@@ -27,13 +27,15 @@ describe('Graph', function() {
 			graph.addNode('foo');
 			graph.addNode('bar');
 
-			expect(graph.nodesById).to.have.keys('foo', 'bar');
-			expect(graph.nodesById.foo).to.deep.equal({ id: 'foo', edges: [] });
-			expect(graph.nodesById.bar).to.deep.equal({ id: 'bar', edges: [] });
+			expect(graph._nodesById).to.have.keys('foo', 'bar');
+			expect(graph._nodesById.foo)
+				.to.deep.equal({ id: 'foo', edges: [] });
+			expect(graph._nodesById.bar)
+				.to.deep.equal({ id: 'bar', edges: [] });
 		});
 
 		it('throws without adding if id already has a node', function() {
-			const fooNode = graph.nodesById.foo = { id: 'foo', edges: [] };
+			const fooNode = graph._nodesById.foo = { id: 'foo', edges: [] };
 
 			expect(() => {
 				graph.addNode('foo');
@@ -44,7 +46,7 @@ describe('Graph', function() {
 				expect(err.info).to.deep.equal({ key: 'foo' });
 				return true;
 			});
-			expect(graph.nodesById.foo).to.equal(fooNode);
+			expect(graph._nodesById.foo).to.equal(fooNode);
 		});
 	});
 
@@ -52,9 +54,9 @@ describe('Graph', function() {
 		let fooNode, barNode, bazNode;
 
 		beforeEach(function() {
-			fooNode = graph.nodesById.foo = { id: 'foo', edges: [] };
-			barNode = graph.nodesById.bar = { id: 'bar', edges: [ fooNode ] };
-			bazNode = graph.nodesById.baz = { id: 'baz', edges: [] };
+			fooNode = graph._nodesById.foo = { id: 'foo', edges: [] };
+			barNode = graph._nodesById.bar = { id: 'bar', edges: [ fooNode ] };
+			bazNode = graph._nodesById.baz = { id: 'baz', edges: [] };
 		});
 
 		it('appends `to` node to `from` node\'s edges', function() {
@@ -99,12 +101,12 @@ describe('Graph', function() {
 
 	describe('#toString', function() {
 		it('returns a string representation of the graph', function() {
-			const fooNode = graph.nodesById.foo = { id: 'foo', edges: [] };
-			const barNode = graph.nodesById.bar = {
+			const fooNode = graph._nodesById.foo = { id: 'foo', edges: [] };
+			const barNode = graph._nodesById.bar = {
 				id: 'bar',
 				edges: [ fooNode ],
 			};
-			graph.nodesById.baz = { id: 'baz', edges: [ fooNode, barNode ] };
+			graph._nodesById.baz = { id: 'baz', edges: [ fooNode, barNode ] };
 
 			expect(graph.toString()).to.equal(
 				'nodes\n' +
@@ -121,7 +123,7 @@ describe('Graph', function() {
 		});
 
 		it('skips edge section, if there are none', function() {
-			graph.nodesById = {
+			graph._nodesById = {
 				foo: { id: 'foo', edges: [] },
 				bar: { id: 'bar', edges: [] },
 			};

@@ -23,8 +23,9 @@ describe('Search', function() {
 
 	it('puts all nodes of provided graph into own node set', function() {
 		const graph = new Graph();
-		const fooNode = graph.nodesById.foo = { id: 'foo' };
-		const barNode = graph.nodesById.bar = { id: 'bar' };
+		const fooNode = { id: 'foo' };
+		const barNode = { id: 'bar' };
+		sinon.stub(graph, 'nodes').get(() => [ fooNode, barNode ]);
 
 		const search = new Search(graph);
 
