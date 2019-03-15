@@ -99,6 +99,26 @@ describe('Graph', function() {
 		});
 	});
 
+	describe('#toObject', function() {
+		it('returns an object representation of the graph', function() {
+			const fooNode = graph._nodesById.foo = { id: 'foo', edges: [] };
+			const barNode = graph._nodesById.bar = {
+				id: 'bar',
+				edges: [ fooNode ],
+			};
+			graph._nodesById.baz = { id: 'baz', edges: [ fooNode, barNode ] };
+
+			expect(graph.toObject()).to.deep.equal({
+				nodes: [ 'bar', 'baz', 'foo' ],
+				edges: [
+					{ from: 'bar', to: 'foo' },
+					{ from: 'baz', to: 'bar' },
+					{ from: 'baz', to: 'foo' },
+				],
+			});
+		});
+	});
+
 	describe('#toString', function() {
 		it('returns a string representation of the graph', function() {
 			const fooNode = graph._nodesById.foo = { id: 'foo', edges: [] };
