@@ -1,6 +1,6 @@
 {
   "name": "topo-strict",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Strict topological sorting",
   "author": "Steve Ripberger",
   "license": "MIT",
