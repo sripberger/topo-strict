@@ -90,12 +90,61 @@ describe('Problem', function() {
 		});
 	});
 
+	describe('#toObject', function() {
+		it('returns an object representation of the problem', function() {
+			problem._ids = {
+				foo: { before: [ 'wtf', 'wow' ], after: [ 'omg' ] },
+				bar: { before: [ 'wut' ] },
+				baz: { after: [ 'gdi', 'ffs' ] },
+				qux: {},
+			};
+			problem._groups = {
+				groupB: [ 'foo', 'bar' ],
+				groupA: [ 'baz' ],
+			};
+
+			expect(problem.toObject()).to.deep.equal({
+				ids: [
+					{
+						key: 'bar',
+						constraints: [
+							{ type: 'before', key: 'wut' },
+						],
+					},
+					{
+						key: 'baz',
+						constraints: [
+							{ type: 'after', key: 'ffs' },
+							{ type: 'after', key: 'gdi' },
+						],
+					},
+					{
+						key: 'foo',
+						constraints: [
+							{ type: 'before', key: 'wow' },
+							{ type: 'before', key: 'wtf' },
+							{ type: 'after', key: 'omg' },
+						],
+					},
+					{
+						key: 'qux',
+						constraints: [],
+					},
+				],
+				groups: [
+					{ key: 'groupA', ids: [ 'baz' ] },
+					{ key: 'groupB', ids: [ 'bar', 'foo' ] },
+				],
+			});
+		});
+	});
+
 	describe('#toString', function() {
 		it('returns a string representation of the problem', function() {
 			problem._ids = {
-				foo: { before: [ 'omg', 'wow' ], after: [ 'wtf' ] },
+				foo: { before: [ 'wtf', 'wow' ], after: [ 'omg' ] },
 				bar: { before: [ 'wut' ] },
-				baz: { after: [ 'ffs', 'gdi' ] },
+				baz: { after: [ 'gdi', 'ffs' ] },
 				qux: {},
 			};
 			problem._groups = {
@@ -112,17 +161,17 @@ describe('Problem', function() {
 				'    after: ffs\n' +
 				'    after: gdi\n' +
 				'foo\n' +
-				'    before: omg\n' +
 				'    before: wow\n' +
-				'    after: wtf\n' +
+				'    before: wtf\n' +
+				'    after: omg\n' +
 				'qux\n\n' +
 				'groups\n' +
 				'------\n' +
 				'groupA\n' +
 				'    baz\n' +
 				'groupB\n' +
-				'    foo\n' +
-				'    bar'
+				'    bar\n' +
+				'    foo'
 			);
 		});
 
