@@ -15,18 +15,17 @@ describe('Problem', function() {
 	});
 
 	it('creates an object for storing ids with their constraints', function() {
-		expect(problem.ids).to.deep.equal({});
+		expect(problem._ids).to.deep.equal({});
 	});
 
 	it('creates an object for storing groups with their ids', function() {
-		expect(problem.groups).to.deep.equal({});
+		expect(problem._groups).to.deep.equal({});
 	});
 
 	describe('@keysByType', function() {
 		it('returns categorized keys from ids and groups', function() {
-			problem.ids = { foo: {}, bar: {} };
-			problem.groups = { baz: [], qux: [] };
-			problem.randomProp = { omg: 'wtf' };
+			problem._ids = { foo: {}, bar: {} };
+			problem._groups = { baz: [], qux: [] };
 
 			expect(problem.keysByType).to.deep.equal({
 				ids: [ 'foo', 'bar' ],
@@ -37,9 +36,8 @@ describe('Problem', function() {
 
 	describe('@keys', function() {
 		it('returns all keys in an array', function() {
-			problem.ids = { foo: {}, bar: {} };
-			problem.groups = { baz: [], qux: [] };
-			problem.randomProp = { omg: 'wtf' };
+			problem._ids = { foo: {}, bar: {} };
+			problem._groups = { baz: [], qux: [] };
 
 			expect(problem.keys).to.deep.equal([ 'foo', 'bar', 'baz', 'qux' ]);
 		});
@@ -94,13 +92,13 @@ describe('Problem', function() {
 
 	describe('#toString', function() {
 		it('returns a string representation of the problem', function() {
-			problem.ids = {
+			problem._ids = {
 				foo: { before: [ 'omg', 'wow' ], after: [ 'wtf' ] },
 				bar: { before: [ 'wut' ] },
 				baz: { after: [ 'ffs', 'gdi' ] },
 				qux: {},
 			};
-			problem.groups = {
+			problem._groups = {
 				groupB: [ 'foo', 'bar' ],
 				groupA: [ 'baz' ],
 			};
@@ -129,7 +127,7 @@ describe('Problem', function() {
 		});
 
 		it('skips groups section if there are none', function() {
-			problem.ids = { foo: {}, bar: {} };
+			problem._ids = { foo: {}, bar: {} };
 
 			expect(problem.toString()).to.equal(
 				'ids\n' +
@@ -140,7 +138,7 @@ describe('Problem', function() {
 		});
 
 		it('skips ids section if there are none', function() {
-			problem.groups = { foo: [], bar: [] };
+			problem._groups = { foo: [], bar: [] };
 
 			expect(problem.toString()).to.equal(
 				'groups\n' +
@@ -197,12 +195,12 @@ describe('Problem', function() {
 		});
 
 		it('adds entry for each id', function() {
-			problem.ids = { foo: {} };
+			problem._ids = { foo: {} };
 			keySet.ids.push('bar', 'baz');
 
 			problem._addKeySet(keySet);
 
-			expect(problem.ids).to.have.keys('foo', 'bar', 'baz');
+			expect(problem._ids).to.have.keys('foo', 'bar', 'baz');
 		});
 
 		it('copies constraints to new entries', function() {
@@ -212,7 +210,7 @@ describe('Problem', function() {
 
 			problem._addKeySet(keySet);
 
-			expect(problem.ids.foo).to.deep.equal({
+			expect(problem._ids.foo).to.deep.equal({
 				before: keySet.before,
 				after: keySet.after,
 			});
@@ -224,7 +222,7 @@ describe('Problem', function() {
 
 			problem._addKeySet(keySet);
 
-			expect(problem.ids.foo).to.deep.equal({ after: keySet.after });
+			expect(problem._ids.foo).to.deep.equal({ after: keySet.after });
 		});
 
 		it('skips empty after constraint', function() {
@@ -233,7 +231,7 @@ describe('Problem', function() {
 
 			problem._addKeySet(keySet);
 
-			expect(problem.ids.foo).to.deep.equal({ before: keySet.before });
+			expect(problem._ids.foo).to.deep.equal({ before: keySet.before });
 		});
 
 		it('adds a group with ids, if key set has one', function() {
@@ -242,25 +240,25 @@ describe('Problem', function() {
 
 			problem._addKeySet(keySet);
 
-			expect(problem.groups).to.have.keys('qux');
-			expect(problem.groups.qux).to.deep.equal([ 'foo', 'bar', 'baz' ]);
+			expect(problem._groups).to.have.keys('qux');
+			expect(problem._groups.qux).to.deep.equal([ 'foo', 'bar', 'baz' ]);
 		});
 
 		it('appends to group ids, if they already exist', function() {
 			keySet.ids.push('foo', 'bar');
 			keySet.group = 'baz';
-			problem.groups.baz = [ 'qux' ];
+			problem._groups.baz = [ 'qux' ];
 
 			problem._addKeySet(keySet);
 
-			expect(problem.groups).to.have.keys('baz');
-			expect(problem.groups.baz).to.deep.equal([ 'qux', 'foo', 'bar' ]);
+			expect(problem._groups).to.have.keys('baz');
+			expect(problem._groups.baz).to.deep.equal([ 'qux', 'foo', 'bar' ]);
 		});
 	});
 
 	describe('#_getErrorInfo', function() {
 		it('gets info objects for any constraint keys with no target', function() {
-			problem.ids = {
+			problem._ids = {
 				id1: {
 					before: [ 'id2', 'foo', 'bar', 'group1', 'baz' ],
 					after: [ 'id3', 'qux', 'group2' ],
@@ -268,7 +266,7 @@ describe('Problem', function() {
 				id2: { before: [ 'omg', 'group1', 'wow', 'id3' ] },
 				id3: { after: [ 'wtf', 'group2' ] },
 			};
-			problem.groups = { group1: [], group2: [] };
+			problem._groups = { group1: [], group2: [] };
 
 			expect(problem._getErrorInfo()).to.deep.equal([
 				{ type: 'missingTarget', keyType: 'before', key: 'foo' },
@@ -332,7 +330,7 @@ describe('Problem', function() {
 		beforeEach(function() {
 			graph = sinon.createStubInstance(graphModule.Graph);
 			sinon.stub(graphModule, 'Graph').returns(graph);
-			problem.ids = { foo: {}, bar: {} };
+			problem._ids = { foo: {}, bar: {} };
 
 			result = problem._toGraphWithNodes();
 		});
@@ -356,7 +354,7 @@ describe('Problem', function() {
 
 	describe('#_applyGroups', function() {
 		it('returns constraints by id with groups applied', function() {
-			problem.ids = {
+			problem._ids = {
 				id1: {
 					before: [ 'id2', 'group1' ],
 					after: [ 'id3', 'group2' ],
@@ -364,7 +362,7 @@ describe('Problem', function() {
 				id2: { before: [ 'group1', 'group2', 'id3' ] },
 				id3: { after: [ 'group2' ] },
 			};
-			problem.groups = {
+			problem._groups = {
 				group1: [ 'foo', 'bar' ],
 				group2: [ 'baz' ],
 			};
